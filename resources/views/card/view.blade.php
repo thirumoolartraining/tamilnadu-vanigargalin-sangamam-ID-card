@@ -4,51 +4,68 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vanigan ID Card</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
       * { box-sizing: border-box; }
       body {
-        background: #dce8df;
-        font-family: Arial, Helvetica, sans-serif;
-        padding: 18px;
-        color: #111;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        font-family: 'Outfit', sans-serif;
+        padding: 40px 18px;
+        color: #fff;
         margin: 0;
+        min-height: 100vh;
       }
 
       .toolbar {
         max-width: 900px;
-        margin: 0 auto 14px;
+        margin: 0 auto 30px;
         display: flex;
         justify-content: center;
-        gap: 10px;
+        gap: 12px;
         flex-wrap: wrap;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 16px 20px;
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       }
 
       .toolbar button,
       .toolbar a {
         border: none;
-        border-radius: 999px;
-        padding: 10px 18px;
-        background: #0a8a43;
+        border-radius: 12px;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.1);
         color: #fff;
-        font-weight: 700;
+        font-weight: 600;
         text-decoration: none;
         cursor: pointer;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: 'Outfit', sans-serif;
         font-size: 14px;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
+        transition: all 0.3s ease;
       }
 
-      .toolbar a {
-        background: #244b3d;
+      .toolbar button:hover, .toolbar a:hover { 
+        background: rgba(255, 255, 255, 0.2); 
+        transform: translateY(-2px);
       }
-
-      .toolbar button:hover { background: #077a3a; }
-      .toolbar a:hover { background: #1a3d30; }
+      
+      .toolbar .btn-primary-action {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+      }
+      
+      .toolbar .btn-primary-action:hover {
+        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+      }
 
       .card-wrap {
         max-width: 560px;
@@ -56,11 +73,16 @@
       }
 
       .meta {
-        color: #2e5741;
-        margin-bottom: 10px;
+        color: #94a3b8;
+        margin-bottom: 20px;
         text-align: center;
-        font-weight: 700;
-        font-size: 12px;
+        font-weight: 500;
+        font-size: 13px;
+        background: rgba(0, 0, 0, 0.2);
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
       }
 
       .card-face {
@@ -68,7 +90,13 @@
         margin: 0 auto;
         position: relative;
         overflow: hidden;
-        border-radius: 10px;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        transition: transform 0.3s ease;
+      }
+
+      .card-face:hover {
+        transform: translateY(-4px);
       }
 
       /* Use <img> tags for backgrounds so they render in print & download */
@@ -116,8 +144,8 @@
         padding: 0;
       }
 
-      .name { font-size: 23px; font-weight: 700; color: #009245; line-height: 1.08; margin: 0; }
-      .designation, .detail-line, .id-number { font-size: 19px; font-weight: 700; text-transform: capitalize; line-height: 1.06; margin: 0; }
+      .name { font-size: 23px; font-weight: 700; color: #009245; line-height: 1.08; margin: 0; font-family: Arial, sans-serif; }
+      .designation, .detail-line, .id-number { font-size: 19px; font-weight: 700; text-transform: capitalize; line-height: 1.06; margin: 0; font-family: Arial, sans-serif; color: #111; }
       .front-line { text-align: center; word-break: break-word; padding: 0 18px; }
       .id-number { font-size: 18px; letter-spacing: 0.2px; margin-top: 2px; }
 
@@ -126,6 +154,8 @@
         top: 234px;
         left: 22px;
         right: 20px;
+        color: #111;
+        font-family: Arial, sans-serif;
       }
 
       .back-details {
@@ -167,20 +197,22 @@
       .small { font-size: 12px; font-weight: bold; line-height: 1.1; margin: 0; }
 
       .no-data {
-        text-align: center; padding: 60px 20px; color: #888;
+        text-align: center; padding: 60px 20px; color: #94a3b8;
       }
-      .no-data i { font-size: 4rem; color: #ccc; display: block; margin-bottom: 16px; }
+      .no-data i { font-size: 4rem; color: #475569; display: block; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
+      @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
       /* Downloading overlay */
       .dl-overlay {
         display: none;
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.5); z-index: 999;
+        background: rgba(15, 23, 42, 0.8); z-index: 999;
         justify-content: center; align-items: center;
+        backdrop-filter: blur(5px);
       }
       .dl-overlay.show { display: flex; }
-      .dl-spinner { color: #fff; font-size: 1.2rem; text-align: center; }
-      .dl-spinner i { font-size: 2rem; display: block; margin-bottom: 10px; animation: spin 1s linear infinite; }
+      .dl-spinner { color: #fff; font-size: 1.2rem; text-align: center; font-weight: 500; font-family: 'Outfit'; }
+      .dl-spinner i { font-size: 2.5rem; display: block; margin-bottom: 15px; animation: spin 1s linear infinite; color: #3b82f6; }
       @keyframes spin { 100% { transform: rotate(360deg); } }
 
       /* Print */
@@ -188,25 +220,27 @@
         @page { size: A4; margin: 10mm; }
         body { background: #fff !important; padding: 0; margin: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         .toolbar, .meta, .dl-overlay { display: none !important; }
-        .card-face { transform: none !important; margin: 10px auto !important; break-inside: avoid; page-break-inside: avoid; }
+        .card-face { transform: none !important; margin: 10px auto !important; break-inside: avoid; page-break-inside: avoid; box-shadow: none !important; }
         .card-bg { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         img { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         #page2-div { page-break-before: auto; margin-top: 20px !important; }
       }
 
       @media (max-width: 520px) {
-        body { padding: 10px; }
+        body { padding: 20px 10px; }
+        .toolbar { flex-wrap: wrap; justify-content: center; padding: 12px; border-radius: 16px; margin-bottom: 20px; }
+        .toolbar button, .toolbar a { padding: 8px 14px; font-size: 13px; flex: 1; justify-content: center; min-width: 130px; }
         .card-face { transform: scale(0.85); transform-origin: top center; margin-bottom: -60px; }
       }
     </style>
   </head>
   <body>
     <div class="toolbar" id="toolbar">
-      <button type="button" onclick="downloadCard('front')"><i class="bi bi-download"></i> Download Front</button>
-      <button type="button" onclick="downloadCard('back')"><i class="bi bi-download"></i> Download Back</button>
-      <button type="button" onclick="downloadCard('both')"><i class="bi bi-images"></i> Download Both</button>
+      <button type="button" class="btn-primary-action" onclick="downloadCard('both')"><i class="bi bi-images"></i> Download Both Sides</button>
+      <button type="button" onclick="downloadCard('front')"><i class="bi bi-download"></i> Front</button>
+      <button type="button" onclick="downloadCard('back')"><i class="bi bi-download"></i> Back</button>
       <button type="button" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
-      <a href="/"><i class="bi bi-arrow-left"></i> Back</a>
+      <a href="/"><i class="bi bi-arrow-left"></i> Home</a>
     </div>
 
     <div class="card-wrap" id="cardWrap">
@@ -316,11 +350,11 @@
         document.getElementById('memberDistrict').textContent = m.district || '';
         document.getElementById('memberUniqueId').textContent = m.unique_id || '';
 
-        // Back
-        document.getElementById('memberDob').textContent = m.dob || '';
-        document.getElementById('memberAge').textContent = m.age || '';
-        document.getElementById('memberBlood').textContent = m.blood_group || '';
-        document.getElementById('memberAddress').textContent = m.address || '';
+        // Back - show XXXXXXX for empty fields
+        document.getElementById('memberDob').textContent = m.dob || 'XXXXXXX';
+        document.getElementById('memberAge').textContent = m.age || 'XXXXXXX';
+        document.getElementById('memberBlood').textContent = m.blood_group || 'XXXXXXX';
+        document.getElementById('memberAddress').textContent = m.address || 'XXXXXXX';
         document.getElementById('memberContact').textContent = m.contact_number || ('+91 ' + (m.mobile || ''));
 
         // QR
@@ -331,6 +365,8 @@
       async function downloadCard(which) {
         const overlay = document.getElementById('dlOverlay');
         overlay.classList.add('show');
+        const m = getMember();
+        const uid = (m && m.unique_id) ? m.unique_id : 'card';
 
         try {
           const opts = {
@@ -341,15 +377,36 @@
             logging: false,
           };
 
-          if (which === 'front' || which === 'both') {
+          if (which === 'front') {
             const frontCanvas = await html2canvas(document.getElementById('page1-div'), opts);
-            triggerDownload(frontCanvas, 'vanigam_card_front.png');
-          }
-
-          if (which === 'back' || which === 'both') {
-            if (which === 'both') await new Promise(r => setTimeout(r, 300));
+            triggerDownload(frontCanvas, uid + '_front.png');
+          } else if (which === 'back') {
             const backCanvas = await html2canvas(document.getElementById('page2-div'), opts);
-            triggerDownload(backCanvas, 'vanigam_card_back.png');
+            triggerDownload(backCanvas, uid + '_back.png');
+          } else if (which === 'both') {
+            const frontCanvas = await html2canvas(document.getElementById('page1-div'), opts);
+            await new Promise(r => setTimeout(r, 300));
+            const backCanvas = await html2canvas(document.getElementById('page2-div'), opts);
+
+            // Combine front and back side-by-side
+            const gap = 40 * opts.scale;
+            const comboCanvas = document.createElement('canvas');
+            comboCanvas.width = frontCanvas.width + backCanvas.width + gap;
+            comboCanvas.height = Math.max(frontCanvas.height, backCanvas.height) + 24 * opts.scale;
+            const ctx = comboCanvas.getContext('2d');
+            // Transparent background (no white bg)
+            ctx.clearRect(0, 0, comboCanvas.width, comboCanvas.height);
+            // Draw "Front" and "Back" labels
+            ctx.font = 'bold ' + (14 * opts.scale) + 'px Inter, sans-serif';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Front', frontCanvas.width / 2, 16 * opts.scale);
+            ctx.fillText('Back', frontCanvas.width + gap + backCanvas.width / 2, 16 * opts.scale);
+            // Draw cards
+            ctx.drawImage(frontCanvas, 0, 20 * opts.scale);
+            ctx.drawImage(backCanvas, frontCanvas.width + gap, 20 * opts.scale);
+
+            triggerDownload(comboCanvas, uid + '_card.png');
           }
         } catch(e) {
           alert('Download failed: ' + e.message);
@@ -367,41 +424,85 @@
         document.body.removeChild(link);
       }
 
+      // Wait for all images in a container to fully load
+      function waitForImages(container, timeoutMs) {
+        return new Promise((resolve) => {
+          const imgs = container.querySelectorAll('img');
+          if (imgs.length === 0) { resolve(); return; }
+          let loaded = 0;
+          const total = imgs.length;
+          const done = () => { loaded++; if (loaded >= total) resolve(); };
+          imgs.forEach(img => {
+            if (img.complete && img.naturalWidth > 0) { done(); return; }
+            img.addEventListener('load', done);
+            img.addEventListener('error', done);
+          });
+          setTimeout(resolve, timeoutMs || 10000);
+        });
+      }
+
       // Auto-save card images to Cloudinary when loaded with ?autosave=1
-      async function autoSaveCardImages() {
+      async function autoSaveCardImages(retryCount) {
         const params = new URLSearchParams(window.location.search);
         if (params.get('autosave') !== '1') return;
 
         const m = getMember();
         if (!m || !m.unique_id) return;
 
+        retryCount = retryCount || 0;
+
         const opts = { scale: 3, useCORS: true, allowTaint: false, backgroundColor: null, logging: false };
 
         try {
-          // Wait a moment for images to fully load
-          await new Promise(r => setTimeout(r, 2000));
+          // Wait for all images to fully load (up to 10 seconds)
+          const frontDiv = document.getElementById('page1-div');
+          const backDiv = document.getElementById('page2-div');
+          await waitForImages(frontDiv, 10000);
+          await waitForImages(backDiv, 10000);
+          // Extra buffer for rendering
+          await new Promise(r => setTimeout(r, 1500));
 
-          const frontCanvas = await html2canvas(document.getElementById('page1-div'), opts);
-          const backCanvas  = await html2canvas(document.getElementById('page2-div'), opts);
+          const frontCanvas = await html2canvas(frontDiv, opts);
+          const backCanvas  = await html2canvas(backDiv, opts);
+
+          // Verify canvases have actual content (not blank)
+          const frontData = frontCanvas.toDataURL('image/png', 1.0);
+          const backData = backCanvas.toDataURL('image/png', 1.0);
+
+          if (frontData.length < 5000 || backData.length < 5000) {
+            console.warn('Card images seem blank, retrying...');
+            if (retryCount < 3) {
+              await new Promise(r => setTimeout(r, 3000));
+              return autoSaveCardImages(retryCount + 1);
+            }
+          }
 
           const res = await fetch('/api/vanigam/upload-card-images', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               unique_id:   m.unique_id,
-              front_image: frontCanvas.toDataURL('image/png', 1.0),
-              back_image:  backCanvas.toDataURL('image/png', 1.0),
+              front_image: frontData,
+              back_image:  backData,
             }),
           });
           const data = await res.json();
           if (data.success) {
             m.card_front_url = data.front_url;
             m.card_back_url  = data.back_url;
-            localStorage.setItem('vanigam_member', JSON.stringify({ memberData: m }));
+            localStorage.setItem('vanigam_member', JSON.stringify({ memberData: m, hasCard: true, mobile: m.mobile, epic: m.epic_no }));
             console.log('Card images saved to Cloudinary successfully.');
+          } else if (retryCount < 3) {
+            console.warn('Upload failed, retrying...', data);
+            await new Promise(r => setTimeout(r, 3000));
+            return autoSaveCardImages(retryCount + 1);
           }
         } catch(e) {
           console.error('Auto-save card images failed:', e);
+          if (retryCount < 3) {
+            await new Promise(r => setTimeout(r, 3000));
+            return autoSaveCardImages(retryCount + 1);
+          }
         }
       }
 

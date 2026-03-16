@@ -117,7 +117,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             epic_no: '{{ $member->epic_no ?? "" }}',
-            dob: document.getElementById('dob').value,
+            dob: (function(){ const v = document.getElementById('dob').value; if (!v) return ''; const p = v.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; })(),
             blood_group: document.getElementById('blood_group').value,
             address: document.getElementById('address').value,
           })
@@ -125,9 +125,23 @@
         const data = await res.json();
         if (data.success) {
           successAlert.classList.add('show');
-          btn.innerHTML = '<i class="bi bi-check-lg"></i> Saved!';
+          btn.innerHTML = '<i class="bi bi-check-lg"></i> Saved! Generating card...';
           btn.style.background = '#4caf50';
-          setTimeout(() => { window.location.reload(); }, 2000);
+          // Update localStorage so card-view autosave can use updated data
+          if (data.member) {
+            try {
+              const existing = JSON.parse(localStorage.getItem('vanigam_member') || '{}');
+              existing.memberData = Object.assign(existing.memberData || {}, data.member);
+              existing.hasCard = true;
+              localStorage.setItem('vanigam_member', JSON.stringify(existing));
+            } catch(e) {}
+            // Trigger card image re-generation via iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.cssText = 'position:absolute;left:-9999px;width:600px;height:1200px;';
+            iframe.src = '/card-view?autosave=1';
+            document.body.appendChild(iframe);
+          }
+          setTimeout(() => { window.location.href = '/member/verify/{{ $unique_id }}'; }, 5000);
         } else {
           document.getElementById('errorMsg').textContent = data.message || 'Failed to save details.';
           errorAlert.classList.add('show');

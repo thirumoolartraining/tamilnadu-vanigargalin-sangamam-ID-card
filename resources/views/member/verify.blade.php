@@ -59,14 +59,60 @@
     .status-complete { background: #e8f5e9; color: #2e7d32; }
     .status-pending { background: #fff3e0; color: #f57c00; }
     .footer { text-align: center; padding: 16px 24px 24px; font-size: 0.78rem; color: #999; }
+
+    /* PIN Input */
+    .pin-box {
+      width: 52px; height: 58px; text-align: center; font-size: 1.5rem; font-weight: 700;
+      border: 2px solid #dfe1e5; border-radius: 12px; outline: none; font-family: monospace;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .pin-box:focus { border-color: #2e7d32; box-shadow: 0 0 0 3px rgba(46,125,50,0.15); }
+    .pin-submit-btn {
+      width: 100%; padding: 14px; background: linear-gradient(135deg, #009345, #009345); color: #fff;
+      border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: background 0.2s, transform 0.1s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .pin-submit-btn:hover { background: linear-gradient(135deg, #007a38, #007a38); }
+    .pin-submit-btn:active { transform: scale(0.98); }
+    .pin-submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
   </style>
 </head>
 <body>
-  <div class="card">
+  <!-- PIN Entry Section -->
+  <div class="card" id="pinSection">
+    <div class="card-header">
+      <h2><i class="bi bi-shield-lock"></i> Tamil Nadu Vanigargalin Sangamam</h2>
+      <p>Member Verification</p>
+      <div class="verified-badge"><i class="bi bi-lock-fill"></i> Enter Secret PIN</div>
+    </div>
+    <div class="card-body" style="text-align:center;">
+      <div style="margin-bottom:20px;">
+        <i class="bi bi-person-badge" style="font-size:3rem;color:#2e7d32;"></i>
+        <h3 style="font-size:1.1rem;font-weight:700;color:#333;margin:10px 0 4px;">{{ $member->name ?? '' }}</h3>
+        <p style="font-size:0.82rem;color:#888;font-family:monospace;">{{ $member->unique_id ?? '' }}</p>
+      </div>
+      <p style="font-size:0.9rem;color:#555;margin-bottom:16px;">Enter your 4-digit secret PIN to view the ID card</p>
+      <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;" id="pinInputs">
+        <input type="tel" maxlength="1" class="pin-box" data-idx="0" autocomplete="off" inputmode="numeric">
+        <input type="tel" maxlength="1" class="pin-box" data-idx="1" autocomplete="off" inputmode="numeric">
+        <input type="tel" maxlength="1" class="pin-box" data-idx="2" autocomplete="off" inputmode="numeric">
+        <input type="tel" maxlength="1" class="pin-box" data-idx="3" autocomplete="off" inputmode="numeric">
+      </div>
+      <div id="pinError" style="color:#d32f2f;font-size:0.85rem;margin-bottom:12px;display:none;"></div>
+      <button id="pinSubmitBtn" class="pin-submit-btn" onclick="verifyPin()">
+        <i class="bi bi-unlock-fill"></i> Verify PIN
+      </button>
+    </div>
+    <div class="footer">Tamil Nadu Vanigargalin Sangamam &copy; {{ date('Y') }}</div>
+  </div>
+
+  <!-- Card Section (hidden until PIN verified) -->
+  <div class="card" id="cardSection" style="display:none;">
     <div class="card-header">
       <h2><i class="bi bi-shield-check"></i> Tamil Nadu Vanigargalin Sangamam</h2>
       <p>Member Verification</p>
-      <div class="verified-badge"><i class="bi bi-patch-check-fill"></i> Verified Member</div>
+      <div class="verified-badge"><i class="bi bi-patch-check-fill"></i> Member ID Card</div>
     </div>
     <div class="card-body">
       <!-- 3D Card View -->
@@ -92,10 +138,10 @@
             <div class="card3d-face card3d-back">
               <div style="position:relative;width:100%;height:100%;background:url('https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232519/vanigan/templates/ID_Back.png') center/contain no-repeat;border-radius:12px;">
                 <div style="position:absolute;top:28%;left:6%;right:6%;font-size:0.55rem;line-height:1.3;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
-                  <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">DATE OF BIRTH</span><span style="font-weight:700;">:</span><span>{{ $member->dob ?? '' }}</span></div>
-                  <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">AGE</span><span style="font-weight:700;">:</span><span>{{ $member->age ?? '' }}</span></div>
-                  <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">BLOOD GROUP</span><span style="font-weight:700;">:</span><span>{{ $member->blood_group ?? '' }}</span></div>
-                  <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:40px;"><span style="font-weight:700;">ADDRESS</span><span style="font-weight:700;">:</span><span style="font-size:0.48rem;word-break:break-word;overflow:hidden;">{{ $member->address ?? '' }}</span></div>
+                  <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">DATE OF BIRTH</span><span style="font-weight:700;">:</span><span>{{ !empty($member->dob) ? $member->dob : 'XXXXXXX' }}</span></div>
+                  <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">AGE</span><span style="font-weight:700;">:</span><span>{{ !empty($member->age) ? $member->age : 'XXXXXXX' }}</span></div>
+                  <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">BLOOD GROUP</span><span style="font-weight:700;">:</span><span>{{ !empty($member->blood_group) ? $member->blood_group : 'XXXXXXX' }}</span></div>
+                  <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:40px;"><span style="font-weight:700;">ADDRESS</span><span style="font-weight:700;">:</span><span style="font-size:0.48rem;word-break:break-word;overflow:hidden;">{{ !empty($member->address) ? $member->address : 'XXXXXXX' }}</span></div>
                   <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">CONTACT</span><span style="font-weight:700;">:</span><span>{{ $member->contact_number ?? '' }}</span></div>
                 </div>
                 <div style="position:absolute;bottom:18%;left:5%;right:5%;display:flex;align-items:flex-end;justify-content:space-between;">
@@ -176,6 +222,59 @@
   </div>
 
   <script>
+    // PIN input handling
+    const pinBoxes = document.querySelectorAll('.pin-box');
+    pinBoxes.forEach((box, i) => {
+      box.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+        if (this.value && i < 3) pinBoxes[i + 1].focus();
+      });
+      box.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !this.value && i > 0) pinBoxes[i - 1].focus();
+        if (e.key === 'Enter') verifyPin();
+      });
+    });
+    pinBoxes[0].focus();
+
+    async function verifyPin() {
+      const pin = Array.from(pinBoxes).map(b => b.value).join('');
+      if (pin.length !== 4) {
+        document.getElementById('pinError').textContent = 'Please enter all 4 digits.';
+        document.getElementById('pinError').style.display = 'block';
+        return;
+      }
+      const btn = document.getElementById('pinSubmitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;"></span> Verifying...';
+      document.getElementById('pinError').style.display = 'none';
+
+      try {
+        const res = await fetch('/api/vanigam/verify-member-pin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ unique_id: '{{ $unique_id }}', pin: pin })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('pinSection').style.display = 'none';
+          document.getElementById('cardSection').style.display = 'block';
+          initCard3d();
+        } else {
+          document.getElementById('pinError').textContent = data.message || 'Invalid PIN.';
+          document.getElementById('pinError').style.display = 'block';
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Verify PIN';
+          pinBoxes.forEach(b => b.value = '');
+          pinBoxes[0].focus();
+        }
+      } catch(e) {
+        document.getElementById('pinError').textContent = 'Network error. Please try again.';
+        document.getElementById('pinError').style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Verify PIN';
+      }
+    }
+
     // 3D Card rotation
     let angle = 0;
     function rotate3d(dir) {
@@ -183,8 +282,7 @@
       document.getElementById('card3dInner').style.transform = 'rotateY(' + angle + 'deg)';
     }
 
-    // Drag to rotate
-    (function() {
+    function initCard3d() {
       const scene = document.getElementById('card3dScene');
       const inner = document.getElementById('card3dInner');
       if (!scene || !inner) return;
@@ -210,14 +308,14 @@
         if (!dragging) return;
         dragging = false;
         inner.classList.remove('dragging');
-        // Snap to nearest 180 degrees
         const snap = Math.round(angle / 180) * 180;
         angle = snap;
         inner.style.transform = 'rotateY(' + angle + 'deg)';
       }
       document.addEventListener('mouseup', endDrag);
       document.addEventListener('touchend', endDrag);
-    })();
+    }
   </script>
+  <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 </body>
 </html>

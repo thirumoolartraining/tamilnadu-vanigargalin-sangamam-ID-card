@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use App\Services\TwilioOtpService;
+use App\Services\TwoFactorOtpService;
 use App\Services\MongoService;
 use App\Helpers\VoterHelper;
 use Endroid\QrCode\QrCode;
@@ -14,13 +14,13 @@ use Exception;
 
 class VanigamController extends Controller
 {
-    protected $twilioOtp;
+    protected $otpService;
     protected $mongo;
     protected $cloudinary;
 
-    public function __construct(TwilioOtpService $twilioOtp, MongoService $mongo)
+    public function __construct(TwoFactorOtpService $otpService, MongoService $mongo)
     {
-        $this->twilioOtp = $twilioOtp;
+        $this->otpService = $otpService;
         $this->mongo = $mongo;
         $this->cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
     }
@@ -56,7 +56,7 @@ class VanigamController extends Controller
                 ], 429);
             }
 
-            $result = $this->twilioOtp->sendOtp($mobile);
+            $result = $this->otpService->sendOtp($mobile);
 
             if ($result['success']) {
                 Cache::put($rateLimitKey, $otpCount + 1, 300);
@@ -141,7 +141,7 @@ class VanigamController extends Controller
             $mobile = $request->input('mobile');
             $otp = $request->input('otp');
 
-            $result = $this->twilioOtp->verifyOtp($mobile, $otp);
+            $result = $this->otpService->verifyOtp($mobile, $otp);
 
             if ($result['success']) {
                 session(['verified_mobile' => $mobile]);
@@ -312,7 +312,13 @@ class VanigamController extends Controller
             $age = '';
             if ($dob) {
                 try {
-                    $dobDate = new \DateTime($dob);
+                    $dobDate = \DateTime::createFromFormat('d/m/Y', $dob);
+                    if (!$dobDate) {
+                        $dobDate = \DateTime::createFromFormat('Y-m-d', $dob);
+                    }
+                    if (!$dobDate) {
+                        $dobDate = new \DateTime($dob);
+                    }
                     $now = new \DateTime();
                     $age = (string) $dobDate->diff($now)->y;
                 } catch (Exception $e) {
@@ -346,6 +352,7 @@ class VanigamController extends Controller
                 'address' => $address,
                 'contact_number' => '+91 ' . $mobile,
                 'details_completed' => !$skippedDetails,
+                'referred_by' => $request->input('referrer_unique_id', ''),
             ];
 
             // Hash PIN if provided
@@ -394,7 +401,13 @@ class VanigamController extends Controller
             $age = '';
             if ($dob) {
                 try {
-                    $dobDate = new \DateTime($dob);
+                    $dobDate = \DateTime::createFromFormat('d/m/Y', $dob);
+                    if (!$dobDate) {
+                        $dobDate = \DateTime::createFromFormat('Y-m-d', $dob);
+                    }
+                    if (!$dobDate) {
+                        $dobDate = new \DateTime($dob);
+                    }
                     $now = new \DateTime();
                     $age = (string) $dobDate->diff($now)->y;
                 } catch (Exception $e) {
@@ -402,12 +415,41 @@ class VanigamController extends Controller
                 }
             }
 
+            // Get existing member to check for old card images
+            $existingMember = $this->mongo->findMemberByEpic($epicNo);
+
             $details = [
                 'dob' => $dob,
                 'age' => $age,
                 'blood_group' => $bloodGroup,
                 'address' => $address,
+                'details_completed' => true,
+                'skipped_details' => false,
             ];
+
+            // Update QR URL from /complete/ to /verify/ since details are now filled
+            if ($existingMember && !empty($existingMember['unique_id'])) {
+                $details['qr_url'] = config('app.url') . '/member/verify/' . $existingMember['unique_id'];
+            }
+
+            // Delete old card images from Cloudinary if they exist
+            if ($existingMember && !empty($existingMember['unique_id'])) {
+                $uniqueId = $existingMember['unique_id'];
+                try {
+                    if (!empty($existingMember['card_front_url'])) {
+                        $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/front');
+                    }
+                    if (!empty($existingMember['card_back_url'])) {
+                        $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/back');
+                    }
+                    // Clear card URLs so new ones will be generated
+                    $details['card_front_url'] = '';
+                    $details['card_back_url'] = '';
+                    Log::info("Old card images removed for {$uniqueId} after details update");
+                } catch (Exception $e) {
+                    Log::warning("Could not delete old Cloudinary cards for {$uniqueId}: " . $e->getMessage());
+                }
+            }
 
             $updated = $this->mongo->updateMemberDetails($epicNo, $details);
 
@@ -526,7 +568,7 @@ class VanigamController extends Controller
 
     /**
      * GET /member/verify/{uniqueId}
-     * Public verification page
+     * Public verification page - shows PIN entry first
      */
     public function verifyMember($uniqueId)
     {
@@ -537,13 +579,48 @@ class VanigamController extends Controller
                 abort(404, 'Member not found.');
             }
 
+            // If details not completed, redirect to complete details form
+            if (empty($member['details_completed']) || !$member['details_completed']) {
+                return redirect()->route('member.complete', ['uniqueId' => $uniqueId]);
+            }
+
+            // Show PIN verification page (card hidden until PIN entered)
             return view('member.verify', [
                 'member' => (object) $member,
+                'unique_id' => $uniqueId,
             ]);
 
         } catch (Exception $e) {
             Log::error('VanigamController::verifyMember Error: ' . $e->getMessage());
             abort(500, 'An error occurred.');
+        }
+    }
+
+    /**
+     * POST /api/vanigam/verify-member-pin
+     * Verify PIN for QR scan verification (by unique_id)
+     */
+    public function verifyMemberPin(Request $request)
+    {
+        try {
+            $request->validate([
+                'unique_id' => 'required|string|max:20',
+                'pin'       => 'required|digits:4',
+            ]);
+
+            $member = $this->mongo->findMemberByUniqueId($request->input('unique_id'));
+            if (!$member || empty($member['pin_hash'])) {
+                return response()->json(['success' => false, 'message' => 'Member not found or PIN not set.'], 404);
+            }
+
+            if (password_verify($request->input('pin'), $member['pin_hash'])) {
+                return response()->json(['success' => true]);
+            }
+
+            return response()->json(['success' => false, 'message' => 'Invalid PIN. Please try again.'], 400);
+        } catch (Exception $e) {
+            Log::error('VanigamController::verifyMemberPin Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
         }
     }
 

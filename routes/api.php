@@ -15,7 +15,7 @@ Route::get('/health', [VanigamController::class, 'health']);
 
 // Tamil Nadu Vanigargalin Sangamam API
 Route::prefix('vanigam')->group(function () {
-    // OTP via Twilio
+    // OTP via 2Factor.in Voice Call
     Route::post('/check-member', [VanigamController::class, 'checkMember']);
     Route::post('/send-otp', [VanigamController::class, 'sendOtp']);
     Route::post('/verify-otp', [VanigamController::class, 'verifyOtp']);
@@ -46,6 +46,9 @@ Route::prefix('vanigam')->group(function () {
 
     // Verify returning user PIN
     Route::post('/verify-pin', [VanigamController::class, 'verifyPin']);
+
+    // Verify member PIN for QR scan
+    Route::post('/verify-member-pin', [VanigamController::class, 'verifyMemberPin']);
 
     // Referral
     Route::post('/get-referral', [VanigamController::class, 'getReferral']);

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VanigamController;
+use App\Http\Controllers\AdminPanelController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,4 +59,17 @@ Route::get('/test/card', function () {
         'generated_at' => now()->format('d M Y, h:i A'),
         'base_url'     => config('app.url'),
     ]);
+});
+
+// ── Admin Panel ────────────────────────────────────────────────────────
+Route::get('/admin/login', [AdminPanelController::class, 'showLogin'])->name('admin.login');
+Route::post('/admin/login', [AdminPanelController::class, 'login'])->name('admin.login.submit');
+
+Route::prefix('admin')->middleware('admin.auth')->group(function () {
+    Route::get('/dashboard', [AdminPanelController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/users', [AdminPanelController::class, 'users'])->name('admin.users');
+    Route::get('/users/{uniqueId}', [AdminPanelController::class, 'userDetail'])->name('admin.user.detail');
+    Route::get('/voters', [AdminPanelController::class, 'voters'])->name('admin.voters');
+    Route::get('/voters/{epicNo}', [AdminPanelController::class, 'voterDetail'])->name('admin.voter.detail');
+    Route::post('/logout', [AdminPanelController::class, 'logout'])->name('admin.logout');
 });

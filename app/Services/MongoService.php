@@ -105,11 +105,11 @@ class MongoService
     }
 
     /**
-     * Generate unique member ID: VNG-XXXXXXX
+     * Generate unique member ID: TNVS-XXXXXX
      */
     public function generateUniqueId(): string
     {
-        return 'VNG-' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 7));
+        return 'TNVS-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
     }
 
     /**
@@ -190,6 +190,193 @@ class MongoService
         } catch (Exception $e) {
             Log::error("MongoService::incrementReferralCount Exception: " . $e->getMessage());
             return false;
+        }
+    }
+
+    /* ── Admin panel helpers ────────────────────────────────── */
+
+    /**
+     * Get paginated members list with optional search/filter.
+     */
+    public function getAllMembers(int $page = 1, int $limit = 20, ?string $search = null, ?string $assembly = null, ?string $district = null): array
+    {
+        try {
+            $filter = [];
+
+            if ($search) {
+                $regex = new \MongoDB\BSON\Regex(preg_quote($search, '/'), 'i');
+                $filter['$or'] = [
+                    ['name' => $regex],
+                    ['epic_no' => $regex],
+                    ['mobile' => $regex],
+                    ['unique_id' => $regex],
+                ];
+            }
+
+            if ($assembly) {
+                $filter['assembly'] = new \MongoDB\BSON\Regex(preg_quote($assembly, '/'), 'i');
+            }
+
+            if ($district) {
+                $filter['district'] = new \MongoDB\BSON\Regex(preg_quote($district, '/'), 'i');
+            }
+
+            $total = $this->collection->countDocuments($filter);
+            $skip = ($page - 1) * $limit;
+
+            $cursor = $this->collection->find($filter, [
+                'sort' => ['created_at' => -1],
+                'skip' => $skip,
+                'limit' => $limit,
+            ]);
+
+            $members = [];
+            foreach ($cursor as $doc) {
+                $member = $this->toArray($doc);
+                if ($member) {
+                    unset($member['pin_hash']);
+                    $members[] = $member;
+                }
+            }
+
+            return [
+                'members' => $members,
+                'total' => $total,
+                'page' => $page,
+                'limit' => $limit,
+                'pages' => (int) ceil($total / max($limit, 1)),
+            ];
+        } catch (Exception $e) {
+            Log::error("MongoService::getAllMembers Exception: " . $e->getMessage());
+            return ['members' => [], 'total' => 0, 'page' => $page, 'limit' => $limit, 'pages' => 0];
+        }
+    }
+
+    /**
+     * Get members referred by a specific member.
+     */
+    public function getMembersReferredBy(string $uniqueId): array
+    {
+        try {
+            $cursor = $this->collection->find(
+                ['referred_by' => $uniqueId],
+                ['sort' => ['created_at' => -1]]
+            );
+
+            $members = [];
+            foreach ($cursor as $doc) {
+                $member = $this->toArray($doc);
+                if ($member) {
+                    unset($member['pin_hash']);
+                    $members[] = $member;
+                }
+            }
+
+            return $members;
+        } catch (Exception $e) {
+            Log::error("MongoService::getMembersReferredBy Exception: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get dashboard statistics via aggregation.
+     */
+    public function getStats(): array
+    {
+        try {
+            $totalMembers = $this->collection->countDocuments();
+            $detailsCompleted = $this->collection->countDocuments(['details_completed' => true]);
+
+            $todayStart = now()->startOfDay()->toISOString();
+            $weekStart = now()->startOfWeek()->toISOString();
+            $monthStart = now()->startOfMonth()->toISOString();
+
+            $membersToday = $this->collection->countDocuments(['created_at' => ['$gte' => $todayStart]]);
+            $membersThisWeek = $this->collection->countDocuments(['created_at' => ['$gte' => $weekStart]]);
+            $membersThisMonth = $this->collection->countDocuments(['created_at' => ['$gte' => $monthStart]]);
+
+            $cardsUploaded = $this->collection->countDocuments([
+                'card_front_url' => ['$exists' => true, '$ne' => ''],
+                'card_back_url' => ['$exists' => true, '$ne' => ''],
+            ]);
+
+            // Total referrals
+            $aggResult = $this->collection->aggregate([
+                ['$group' => ['_id' => null, 'total' => ['$sum' => ['$ifNull' => ['$referral_count', 0]]]]],
+            ])->toArray();
+            $totalReferrals = !empty($aggResult) ? (int)($aggResult[0]['total'] ?? 0) : 0;
+
+            // Top 10 referrers
+            $topReferrers = array_map(
+                fn($doc) => json_decode(json_encode($doc), true),
+                $this->collection->aggregate([
+                    ['$match' => ['referral_count' => ['$gt' => 0]]],
+                    ['$sort' => ['referral_count' => -1]],
+                    ['$limit' => 10],
+                    ['$project' => ['_id' => 0, 'unique_id' => 1, 'name' => 1, 'mobile' => 1, 'assembly' => 1, 'referral_count' => 1]],
+                ])->toArray()
+            );
+
+            // Members by assembly (top 10)
+            $assemblyStats = array_map(
+                fn($doc) => ['assembly' => json_decode(json_encode($doc), true)['_id'] ?? 'Unknown', 'count' => json_decode(json_encode($doc), true)['count'] ?? 0],
+                $this->collection->aggregate([
+                    ['$group' => ['_id' => '$assembly', 'count' => ['$sum' => 1]]],
+                    ['$sort' => ['count' => -1]],
+                    ['$limit' => 10],
+                ])->toArray()
+            );
+
+            // Members by district (top 10)
+            $districtStats = array_map(
+                fn($doc) => ['district' => json_decode(json_encode($doc), true)['_id'] ?? 'Unknown', 'count' => json_decode(json_encode($doc), true)['count'] ?? 0],
+                $this->collection->aggregate([
+                    ['$group' => ['_id' => '$district', 'count' => ['$sum' => 1]]],
+                    ['$sort' => ['count' => -1]],
+                    ['$limit' => 10],
+                ])->toArray()
+            );
+
+            // Recent 10
+            $recentMembers = [];
+            foreach ($this->collection->find([], ['sort' => ['created_at' => -1], 'limit' => 10]) as $doc) {
+                $m = $this->toArray($doc);
+                if ($m) { unset($m['pin_hash']); $recentMembers[] = $m; }
+            }
+
+            $completionRate = $totalMembers > 0 ? round(($detailsCompleted / $totalMembers) * 100, 1) : 0;
+
+            return compact(
+                'totalMembers', 'detailsCompleted', 'completionRate', 'cardsUploaded',
+                'totalReferrals', 'membersToday', 'membersThisWeek', 'membersThisMonth',
+                'topReferrers', 'assemblyStats', 'districtStats', 'recentMembers'
+            );
+        } catch (Exception $e) {
+            Log::error("MongoService::getStats Exception: " . $e->getMessage());
+            return [
+                'totalMembers' => 0, 'detailsCompleted' => 0, 'completionRate' => 0,
+                'cardsUploaded' => 0, 'totalReferrals' => 0, 'membersToday' => 0,
+                'membersThisWeek' => 0, 'membersThisMonth' => 0,
+                'topReferrers' => [], 'assemblyStats' => [], 'districtStats' => [],
+                'recentMembers' => [],
+            ];
+        }
+    }
+
+    /**
+     * Get distinct values for a field (for filter dropdowns).
+     */
+    public function getDistinctValues(string $field): array
+    {
+        try {
+            $values = $this->collection->distinct($field);
+            $result = array_filter(array_map('strval', $values), fn($v) => !empty($v));
+            sort($result);
+            return $result;
+        } catch (Exception $e) {
+            Log::error("MongoService::getDistinctValues Exception: " . $e->getMessage());
+            return [];
         }
     }
 }

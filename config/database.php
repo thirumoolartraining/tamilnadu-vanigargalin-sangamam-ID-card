@@ -64,12 +64,12 @@ return [
         ],
 
         'voters' => [
-            'driver' => env('DB_VOTERS_CONNECTION', 'mysql'),
-            'database' => env('DB_VOTERS_CONNECTION') === 'sqlite' ? database_path('voters.sqlite') : env('DB_VOTERS_DATABASE', 'mysql_voters'),
-            'host' => env('DB_VOTERS_HOST', '174.138.49.116'),
-            'port' => env('DB_VOTERS_PORT', 3306),
-            'username' => env('DB_VOTERS_USERNAME', ''),
-            'password' => env('DB_VOTERS_PASSWORD', ''),
+            'driver' => 'mysql',
+            'database' => env('DB_DATABASE', 'hkqbnymdjz'),
+            'host' => env('DB_HOST', '174.138.49.116'),
+            'port' => env('DB_PORT', 3306),
+            'username' => env('DB_USERNAME', ''),
+            'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
