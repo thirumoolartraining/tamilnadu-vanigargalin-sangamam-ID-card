@@ -53,8 +53,8 @@
   <!-- PIN Entry Section -->
   <div class="card" id="pinSection">
     <div class="card-header">
-      <h2><i class="bi bi-shield-lock"></i> Verify Your Identity</h2>
-      <p>Enter your secret PIN to continue</p>
+      <h2><i class="bi bi-shield-lock"></i> <span class="t" data-en="Verify Your Identity" data-ta="உங்கள் அடையாளத்தைச் சரிபார்க்கவும்">Verify Your Identity</span></h2>
+      <p><span class="t" data-en="Enter your secret PIN to continue" data-ta="தொடர உங்கள் ரகசிய PIN ஐ உள்ளிடவும்">Enter your secret PIN to continue</span></p>
     </div>
     <div class="card-body" style="text-align:center;">
       <div style="margin-bottom:20px;">
@@ -62,7 +62,7 @@
         <h3 style="font-size:1.1rem;font-weight:700;color:#333;margin:10px 0 4px;">{{ $member->name ?? '' }}</h3>
         <p style="font-size:0.82rem;color:#888;font-family:monospace;">{{ $member->unique_id ?? '' }}</p>
       </div>
-      <p style="font-size:0.9rem;color:#555;margin-bottom:16px;">Enter your 4-digit secret PIN</p>
+      <p style="font-size:0.9rem;color:#555;margin-bottom:16px;"><span class="t" data-en="Enter your 4-digit secret PIN" data-ta="உங்கள் 4 இலக்க ரகசிய PIN ஐ உள்ளிடவும்">Enter your 4-digit secret PIN</span></p>
       <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;" id="pinInputs">
         <input type="tel" maxlength="1" class="pin-box" data-idx="0" autocomplete="off" inputmode="numeric">
         <input type="tel" maxlength="1" class="pin-box" data-idx="1" autocomplete="off" inputmode="numeric">
@@ -71,17 +71,17 @@
       </div>
       <div id="pinError" style="color:#d32f2f;font-size:0.85rem;margin-bottom:12px;display:none;"></div>
       <button id="pinSubmitBtn" class="submit-btn" onclick="verifyPin()">
-        <i class="bi bi-unlock-fill"></i> Verify PIN
+        <i class="bi bi-unlock-fill"></i> <span class="t" data-en="Verify PIN" data-ta="PIN ஐ சரிபார்">Verify PIN</span>
       </button>
     </div>
-    <div class="footer">Tamil Nadu Vanigargalin Sangamam &copy; {{ date('Y') }}</div>
+    <div class="footer"><span class="t" data-en="Tamil Nadu Vanigargalin Sangamam" data-ta="தமிழ்நாடு வணிகர்களின் சங்கமம்">Tamil Nadu Vanigargalin Sangamam</span> &copy; {{ date('Y') }}</div>
   </div>
 
   <!-- Details Form Section (hidden until PIN verified) -->
   <div class="card" id="detailsSection" style="display:none;">
     <div class="card-header">
-      <h2><i class="bi bi-pencil-square"></i> Complete Your Details</h2>
-      <p>Fill in missing information for your Tamil Nadu Vanigargalin Sangamam</p>
+      <h2><i class="bi bi-pencil-square"></i> <span class="t" data-en="Complete Your Details" data-ta="உங்கள் விவரங்களை நிரப்பவும்">Complete Your Details</span></h2>
+      <p><span class="t" data-en="Fill in missing information for your Tamil Nadu Vanigargalin Sangamam" data-ta="உங்கள் தமிழ்நாடு வணிகர்களின் சங்கமத்திற்கான விடுபட்ட தகவல்களை நிரப்பவும்">Fill in missing information for your Tamil Nadu Vanigargalin Sangamam</span></p>
     </div>
     <div class="card-body">
       <div class="member-info">
@@ -92,46 +92,55 @@
       @if(!empty($member->details_completed) && $member->details_completed)
         <div class="already-done">
           <i class="bi bi-check-circle-fill"></i>
-          <h3>All Details Complete!</h3>
-          <p>Your membership details are already filled in. No further action needed.</p>
+          <h3><span class="t" data-en="All Details Complete!" data-ta="அனைத்து விவரங்களும் நிரப்பப்பட்டுள்ளன!">All Details Complete!</span></h3>
+          <p><span class="t" data-en="Your membership details are already filled in. No further action needed." data-ta="உங்கள் உறுப்பினர் விவரங்கள் ஏற்கனவே நிரப்பப்பட்டுள்ளன. மேலும் எந்த நடவடிக்கையும் தேவையில்லை.">Your membership details are already filled in. No further action needed.</span></p>
         </div>
       @else
         <div class="alert alert-success" id="successAlert">
-          <i class="bi bi-check-circle"></i> Details saved successfully! Your membership card will be updated.
+          <i class="bi bi-check-circle"></i> <span class="t" data-en="Details saved successfully! Your membership card will be updated." data-ta="விவரங்கள் வெற்றிகரமாகச் சேமிக்கப்பட்டன! உங்கள் உறுப்பினர் அட்டை புதுப்பிக்கப்படும்.">Details saved successfully! Your membership card will be updated.</span>
         </div>
         <div class="alert alert-error" id="errorAlert">
-          <i class="bi bi-exclamation-triangle"></i> <span id="errorMsg">Something went wrong.</span>
+          <i class="bi bi-exclamation-triangle"></i> <span id="errorMsg"><span class="t" data-en="Something went wrong." data-ta="ஏதோ பிழை ஏற்பட்டது.">Something went wrong.</span></span>
         </div>
 
         <form id="detailsForm">
           <div class="form-group">
-            <label><i class="bi bi-calendar3"></i> Date of Birth</label>
+            <label><i class="bi bi-calendar3"></i> <span class="t" data-en="Date of Birth" data-ta="பிறந்த தேதி">Date of Birth</span></label>
             <input type="date" id="dob" name="dob" value="{{ $member->dob ?? '' }}" required>
           </div>
           <div class="form-group">
-            <label><i class="bi bi-droplet-fill"></i> Blood Group</label>
+            <label><i class="bi bi-droplet-fill"></i> <span class="t" data-en="Blood Group" data-ta="இரத்தக் குழு">Blood Group</span></label>
             <select id="blood_group" name="blood_group">
-              <option value="">Select Blood Group</option>
+              <option value=""><span class="t" data-en="Select Blood Group" data-ta="இரத்தக் குழுவைத் தேர்ந்தெடுக்கவும்">Select Blood Group</span></option>
               @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $bg)
                 <option value="{{ $bg }}" {{ (($member->blood_group ?? '') === $bg) ? 'selected' : '' }}>{{ $bg }}</option>
               @endforeach
             </select>
           </div>
           <div class="form-group">
-            <label><i class="bi bi-geo-alt-fill"></i> Full Address</label>
+            <label><i class="bi bi-geo-alt-fill"></i> <span class="t" data-en="Full Address" data-ta="முழு முகவரி">Full Address</span></label>
             <textarea id="address" name="address" placeholder="Enter your full address...">{{ $member->address ?? '' }}</textarea>
           </div>
           <button type="submit" class="submit-btn" id="submitBtn">
-            <i class="bi bi-check-lg"></i> Save Details
+            <i class="bi bi-check-lg"></i> <span class="t" data-en="Save Details" data-ta="விவரங்களைச் சேமி">Save Details</span>
           </button>
         </form>
       @endif
     </div>
     <div class="footer">
-      Tamil Nadu Vanigargalin Sangamam &copy; {{ date('Y') }}
+      <span class="t" data-en="Tamil Nadu Vanigargalin Sangamam" data-ta="தமிழ்நாடு வணிகர்களின் சங்கமம்">Tamil Nadu Vanigargalin Sangamam</span> &copy; {{ date('Y') }}
     </div>
   </div>
 
+  <script>
+    // Language system - read from localStorage (shared with chatbot)
+    const lang = localStorage.getItem('vanigam_lang') || 'en';
+    if (lang === 'ta') {
+      document.querySelectorAll('.t').forEach(el => {
+        if (el.dataset.ta) el.textContent = el.dataset.ta;
+      });
+    }
+  </script>
   <script>
     // PIN input handling
     const pinBoxes = document.querySelectorAll('.pin-box');
@@ -150,13 +159,13 @@
     async function verifyPin() {
       const pin = Array.from(pinBoxes).map(b => b.value).join('');
       if (pin.length !== 4) {
-        document.getElementById('pinError').textContent = 'Please enter all 4 digits.';
+        document.getElementById('pinError').textContent = lang === 'ta' ? 'அனைத்து 4 இலக்கங்களையும் உள்ளிடவும்.' : 'Please enter all 4 digits.';
         document.getElementById('pinError').style.display = 'block';
         return;
       }
       const btn = document.getElementById('pinSubmitBtn');
       btn.disabled = true;
-      btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;"></span> Verifying...';
+      btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;"></span> ' + (lang === 'ta' ? 'சரிபார்க்கிறது...' : 'Verifying...');
       document.getElementById('pinError').style.display = 'none';
 
       try {
@@ -170,18 +179,18 @@
           document.getElementById('pinSection').style.display = 'none';
           document.getElementById('detailsSection').style.display = 'block';
         } else {
-          document.getElementById('pinError').textContent = data.message || 'Invalid PIN.';
+          document.getElementById('pinError').textContent = data.message || (lang === 'ta' ? 'தவறான PIN.' : 'Invalid PIN.');
           document.getElementById('pinError').style.display = 'block';
           btn.disabled = false;
-          btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Verify PIN';
+          btn.innerHTML = '<i class="bi bi-unlock-fill"></i> ' + (lang === 'ta' ? 'PIN ஐ சரிபார்' : 'Verify PIN');
           pinBoxes.forEach(b => b.value = '');
           pinBoxes[0].focus();
         }
       } catch(e) {
-        document.getElementById('pinError').textContent = 'Network error. Please try again.';
+        document.getElementById('pinError').textContent = lang === 'ta' ? 'நெட்வொர்க் பிழை. மீண்டும் முயற்சிக்கவும்.' : 'Network error. Please try again.';
         document.getElementById('pinError').style.display = 'block';
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Verify PIN';
+        btn.innerHTML = '<i class="bi bi-unlock-fill"></i> ' + (lang === 'ta' ? 'PIN ஐ சரிபார்' : 'Verify PIN');
       }
     }
   </script>
@@ -195,7 +204,7 @@
       const errorAlert = document.getElementById('errorAlert');
 
       btn.disabled = true;
-      btn.innerHTML = '<span style="display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:6px;"></span> Saving...';
+      btn.innerHTML = '<span style="display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:6px;"></span> ' + (lang === 'ta' ? 'சேமிக்கிறது...' : 'Saving...');
       successAlert.classList.remove('show');
       errorAlert.classList.remove('show');
 
@@ -213,7 +222,7 @@
         const data = await res.json();
         if (data.success) {
           successAlert.classList.add('show');
-          btn.innerHTML = '<i class="bi bi-check-lg"></i> Saved! Generating card...';
+          btn.innerHTML = '<i class="bi bi-check-lg"></i> ' + (lang === 'ta' ? 'சேமிக்கப்பட்டது! அட்டை உருவாக்கப்படுகிறது...' : 'Saved! Generating card...');
           btn.style.background = '#4caf50';
           // Update localStorage so card-view autosave can use updated data
           if (data.member) {
@@ -231,16 +240,16 @@
           }
           setTimeout(() => { window.location.href = '/member/verify/{{ $unique_id }}'; }, 5000);
         } else {
-          document.getElementById('errorMsg').textContent = data.message || 'Failed to save details.';
+          document.getElementById('errorMsg').textContent = data.message || (lang === 'ta' ? 'விவரங்களைச் சேமிக்கத் தோல்வி.' : 'Failed to save details.');
           errorAlert.classList.add('show');
           btn.disabled = false;
-          btn.innerHTML = '<i class="bi bi-check-lg"></i> Save Details';
+          btn.innerHTML = '<i class="bi bi-check-lg"></i> ' + (lang === 'ta' ? 'விவரங்களைச் சேமி' : 'Save Details');
         }
       } catch(err) {
-        document.getElementById('errorMsg').textContent = 'Network error. Please try again.';
+        document.getElementById('errorMsg').textContent = lang === 'ta' ? 'நெட்வொர்க் பிழை. மீண்டும் முயற்சிக்கவும்.' : 'Network error. Please try again.';
         errorAlert.classList.add('show');
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-check-lg"></i> Save Details';
+        btn.innerHTML = '<i class="bi bi-check-lg"></i> ' + (lang === 'ta' ? 'விவரங்களைச் சேமி' : 'Save Details');
       }
     });
   </script>

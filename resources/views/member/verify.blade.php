@@ -82,9 +82,9 @@
   <!-- PIN Entry Section -->
   <div class="card" id="pinSection">
     <div class="card-header">
-      <h2><i class="bi bi-shield-lock"></i> Tamil Nadu Vanigargalin Sangamam</h2>
-      <p>Member Verification</p>
-      <div class="verified-badge"><i class="bi bi-lock-fill"></i> Enter Secret PIN</div>
+      <h2><i class="bi bi-shield-lock"></i> <span class="t" data-en="Tamil Nadu Vanigargalin Sangamam" data-ta="தமிழ்நாடு வணிகர்களின் சங்கமம்">Tamil Nadu Vanigargalin Sangamam</span></h2>
+      <p><span class="t" data-en="Member Verification" data-ta="உறுப்பினர் சரிபார்ப்பு">Member Verification</span></p>
+      <div class="verified-badge"><i class="bi bi-lock-fill"></i> <span class="t" data-en="Enter Secret PIN" data-ta="ரகசிய PIN ஐ உள்ளிடவும்">Enter Secret PIN</span></div>
     </div>
     <div class="card-body" style="text-align:center;">
       <div style="margin-bottom:20px;">
@@ -92,7 +92,7 @@
         <h3 style="font-size:1.1rem;font-weight:700;color:#333;margin:10px 0 4px;">{{ $member->name ?? '' }}</h3>
         <p style="font-size:0.82rem;color:#888;font-family:monospace;">{{ $member->unique_id ?? '' }}</p>
       </div>
-      <p style="font-size:0.9rem;color:#555;margin-bottom:16px;">Enter your 4-digit secret PIN to view the ID card</p>
+      <p style="font-size:0.9rem;color:#555;margin-bottom:16px;"><span class="t" data-en="Enter your 4-digit secret PIN to view the ID card" data-ta="அடையாள அட்டையைக் காண உங்கள் 4 இலக்க ரகசிய PIN ஐ உள்ளிடவும்">Enter your 4-digit secret PIN to view the ID card</span></p>
       <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;" id="pinInputs">
         <input type="tel" maxlength="1" class="pin-box" data-idx="0" autocomplete="off" inputmode="numeric">
         <input type="tel" maxlength="1" class="pin-box" data-idx="1" autocomplete="off" inputmode="numeric">
@@ -101,18 +101,18 @@
       </div>
       <div id="pinError" style="color:#d32f2f;font-size:0.85rem;margin-bottom:12px;display:none;"></div>
       <button id="pinSubmitBtn" class="pin-submit-btn" onclick="verifyPin()">
-        <i class="bi bi-unlock-fill"></i> Verify PIN
+        <i class="bi bi-unlock-fill"></i> <span class="t" data-en="Verify PIN" data-ta="PIN ஐ சரிபார்">Verify PIN</span>
       </button>
     </div>
-    <div class="footer">Tamil Nadu Vanigargalin Sangamam &copy; {{ date('Y') }}</div>
+    <div class="footer"><span class="t" data-en="Tamil Nadu Vanigargalin Sangamam" data-ta="தமிழ்நாடு வணிகர்களின் சங்கமம்">Tamil Nadu Vanigargalin Sangamam</span> &copy; {{ date('Y') }}</div>
   </div>
 
   <!-- Card Section (hidden until PIN verified) -->
   <div class="card" id="cardSection" style="display:none;">
     <div class="card-header">
-      <h2><i class="bi bi-shield-check"></i> Tamil Nadu Vanigargalin Sangamam</h2>
-      <p>Member Verification</p>
-      <div class="verified-badge"><i class="bi bi-patch-check-fill"></i> Member ID Card</div>
+      <h2><i class="bi bi-shield-check"></i> <span class="t" data-en="Tamil Nadu Vanigargalin Sangamam" data-ta="தமிழ்நாடு வணிகர்களின் சங்கமம்">Tamil Nadu Vanigargalin Sangamam</span></h2>
+      <p><span class="t" data-en="Member Verification" data-ta="உறுப்பினர் சரிபார்ப்பு">Member Verification</span></p>
+      <div class="verified-badge"><i class="bi bi-patch-check-fill"></i> <span class="t" data-en="Member ID Card" data-ta="உறுப்பினர் அடையாள அட்டை">Member ID Card</span></div>
     </div>
     <div class="card-body">
       <!-- 3D Card View -->
@@ -159,7 +159,7 @@
         </div>
         <div class="card3d-controls">
           <button class="card3d-btn" onclick="rotate3d(-1)" title="Rotate Left"><i class="bi bi-arrow-counterclockwise"></i></button>
-          <span class="card3d-hint"><i class="bi bi-hand-index-thumb"></i> Drag to rotate</span>
+          <span class="card3d-hint"><i class="bi bi-hand-index-thumb"></i> <span class="t" data-en="Drag to rotate" data-ta="சுழற்ற இழுக்கவும்">Drag to rotate</span></span>
           <button class="card3d-btn" onclick="rotate3d(1)" title="Rotate Right"><i class="bi bi-arrow-clockwise"></i></button>
         </div>
       </div>
@@ -167,60 +167,69 @@
       <!-- Member Details -->
       <div class="details-list">
         <div class="detail-item">
-          <span class="detail-label">Name</span>
+          <span class="detail-label"><span class="t" data-en="Name" data-ta="பெயர்">Name</span></span>
           <span class="detail-value">{{ $member->name ?? 'N/A' }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">Membership</span>
+          <span class="detail-label"><span class="t" data-en="Membership" data-ta="உறுப்பினர்">Membership</span></span>
           <span class="detail-value">{{ $member->membership ?? 'Member' }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">Member ID</span>
+          <span class="detail-label"><span class="t" data-en="Member ID" data-ta="உறுப்பினர் எண்">Member ID</span></span>
           <span class="detail-value" style="font-family:monospace;">{{ $member->unique_id ?? '' }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">Assembly</span>
+          <span class="detail-label"><span class="t" data-en="Assembly" data-ta="சட்டமன்றத் தொகுதி">Assembly</span></span>
           <span class="detail-value">{{ $member->assembly ?? 'N/A' }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">District</span>
+          <span class="detail-label"><span class="t" data-en="District" data-ta="மாவட்டம்">District</span></span>
           <span class="detail-value">{{ $member->district ?? 'N/A' }}</span>
         </div>
         @if(!empty($member->dob))
         <div class="detail-item">
-          <span class="detail-label">DOB</span>
+          <span class="detail-label"><span class="t" data-en="DOB" data-ta="பிறந்த தேதி">DOB</span></span>
           <span class="detail-value">{{ $member->dob }}</span>
         </div>
         @endif
         @if(!empty($member->age))
         <div class="detail-item">
-          <span class="detail-label">Age</span>
+          <span class="detail-label"><span class="t" data-en="Age" data-ta="வயது">Age</span></span>
           <span class="detail-value">{{ $member->age }}</span>
         </div>
         @endif
         @if(!empty($member->blood_group))
         <div class="detail-item">
-          <span class="detail-label">Blood Group</span>
+          <span class="detail-label"><span class="t" data-en="Blood Group" data-ta="இரத்தக் குழு">Blood Group</span></span>
           <span class="detail-value">{{ $member->blood_group }}</span>
         </div>
         @endif
         <div class="detail-item">
-          <span class="detail-label">Details Status</span>
+          <span class="detail-label"><span class="t" data-en="Details Status" data-ta="விவரங்கள் நிலை">Details Status</span></span>
           <span class="detail-value">
             @if(!empty($member->details_completed) && $member->details_completed)
-              <span class="status-badge status-complete"><i class="bi bi-check-circle"></i> Complete</span>
+              <span class="status-badge status-complete"><i class="bi bi-check-circle"></i> <span class="t" data-en="Complete" data-ta="நிரப்பப்பட்டது">Complete</span></span>
             @else
-              <span class="status-badge status-pending"><i class="bi bi-clock"></i> Pending</span>
+              <span class="status-badge status-pending"><i class="bi bi-clock"></i> <span class="t" data-en="Pending" data-ta="நிலுவையில்">Pending</span></span>
             @endif
           </span>
         </div>
       </div>
     </div>
     <div class="footer">
-      Tamil Nadu Vanigargalin Sangamam &copy; {{ date('Y') }}
+      <span class="t" data-en="Tamil Nadu Vanigargalin Sangamam" data-ta="தமிழ்நாடு வணிகர்களின் சங்கமம்">Tamil Nadu Vanigargalin Sangamam</span> &copy; {{ date('Y') }}
     </div>
   </div>
 
+  <script>
+    // Language system - read from localStorage (shared with chatbot)
+    const lang = localStorage.getItem('vanigam_lang') || 'en';
+    if (lang === 'ta') {
+      document.querySelectorAll('.t').forEach(el => {
+        if (el.dataset.ta) el.textContent = el.dataset.ta;
+      });
+    }
+  </script>
   <script>
     // PIN input handling
     const pinBoxes = document.querySelectorAll('.pin-box');
@@ -239,13 +248,13 @@
     async function verifyPin() {
       const pin = Array.from(pinBoxes).map(b => b.value).join('');
       if (pin.length !== 4) {
-        document.getElementById('pinError').textContent = 'Please enter all 4 digits.';
+        document.getElementById('pinError').textContent = lang === 'ta' ? 'அனைத்து 4 இலக்கங்களையும் உள்ளிடவும்.' : 'Please enter all 4 digits.';
         document.getElementById('pinError').style.display = 'block';
         return;
       }
       const btn = document.getElementById('pinSubmitBtn');
       btn.disabled = true;
-      btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;"></span> Verifying...';
+      btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;"></span> ' + (lang === 'ta' ? 'சரிபார்க்கிறது...' : 'Verifying...');
       document.getElementById('pinError').style.display = 'none';
 
       try {
@@ -260,18 +269,18 @@
           document.getElementById('cardSection').style.display = 'block';
           initCard3d();
         } else {
-          document.getElementById('pinError').textContent = data.message || 'Invalid PIN.';
+          document.getElementById('pinError').textContent = data.message || (lang === 'ta' ? 'தவறான PIN.' : 'Invalid PIN.');
           document.getElementById('pinError').style.display = 'block';
           btn.disabled = false;
-          btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Verify PIN';
+          btn.innerHTML = '<i class="bi bi-unlock-fill"></i> ' + (lang === 'ta' ? 'PIN ஐ சரிபார்' : 'Verify PIN');
           pinBoxes.forEach(b => b.value = '');
           pinBoxes[0].focus();
         }
       } catch(e) {
-        document.getElementById('pinError').textContent = 'Network error. Please try again.';
+        document.getElementById('pinError').textContent = lang === 'ta' ? 'நெட்வொர்க் பிழை. மீண்டும் முயற்சிக்கவும்.' : 'Network error. Please try again.';
         document.getElementById('pinError').style.display = 'block';
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Verify PIN';
+        btn.innerHTML = '<i class="bi bi-unlock-fill"></i> ' + (lang === 'ta' ? 'PIN ஐ சரிபார்' : 'Verify PIN');
       }
     }
 

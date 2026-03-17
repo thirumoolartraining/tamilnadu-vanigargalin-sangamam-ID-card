@@ -673,6 +673,278 @@
       let referrerUniqueId = urlParams.get('ref') || '';
       let referrerRefId = urlParams.get('ref_id') || '';
 
+      /* ── Language System ── */
+      let currentLang = localStorage.getItem('vanigam_lang') || 'en';
+      const T = {
+        // Header
+        header_title: { en: 'Tamil Nadu Vanigargalin Sangamam', ta: 'தமிழ்நாடு வணிகர்களின் சங்கமம்' },
+        header_subtitle: { en: 'Digital Member ID Card', ta: 'டிஜிட்டல் உறுப்பினர் அடையாள அட்டை' },
+
+        // Banner / Welcome
+        banner_welcome: { en: '<strong>Welcome to Tamil Nadu Vanigargalin Sangamam!</strong><br>Your Digital Member ID Card Generator', ta: '<strong>தமிழ்நாடு வணிகர்களின் சங்கமத்திற்கு வரவேற்கிறோம்!</strong><br>உங்கள் டிஜிட்டல் உறுப்பினர் அடையாள அட்டை உருவாக்கி' },
+        banner_hello: {
+          en: '\uD83D\uDC4B Hello! Generate your <strong>Tamil Nadu Vanigargalin Sangamam Card</strong> in minutes.',
+          ta: '\uD83D\uDC4B வணக்கம்! உங்கள் <strong>தமிழ்நாடு வணிகர்களின் சங்கமம் அட்டையை</strong> சில நிமிடங்களில் உருவாக்குங்கள்.<br><br>வணிகர்களுக்கு அரசியலில் அதிகாரமும் அங்கீகாரமும் கிடைக்கப் பெற வேண்டும், அதற்காக தமிழ்நாடு வணிகர்களின் சங்கமம் கட்டமைப்பில் சில மாற்றங்களை மேற்கொண்டுள்ளது.<br><br>2 சட்டமன்ற தொகுதிக்கு ஒரு மாவட்ட நிர்வாகத்தை ஏற்படுத்துவது மற்றும் 30 சார்பு தொழில் முனைவோர் பிரிவுகளை ஏற்படுத்தி உறுப்பினர் சேர்க்கையை விரிவுபடுத்துவது.<br><br>டிஜிட்டல் முறையில் உறுப்பினர் அட்டையை இணையம் வழியாக வழங்குவது.<br><br>2026 ஆம் ஆண்டு டிசம்பர் மாத இறுதிக்குள் உள்ளாட்சி அமைப்புகளில் அதிகாரமும் அங்கீகாரமும் பெரும் வகையில் ஒரு கோடி உறுப்பினர்களை இணைக்கத் திட்டமிடப்பட்டுள்ளது.<br><br>வாக்காளர் எண்ணை வைத்து உறுப்பினர் அட்டையைப் பெற ஏற்பாடு செய்யப்பட்டுள்ளது.'
+        },
+        banner_tap_start: { en: 'Tap Start to begin the registration process.', ta: 'பதிவு செயல்முறையைத் தொடங்க Start ஐ அழுத்தவும்.' },
+        btn_start: { en: 'Start', ta: 'தொடங்கு' },
+        btn_starting: { en: 'Starting...', ta: 'தொடங்குகிறது...' },
+
+        // Mobile
+        ask_mobile: {
+          en: '\uD83D\uDCF1 Please enter your <strong>10-digit mobile number</strong> to verify:',
+          ta: '\uD83D\uDCF1 சங்கமத்தில் இருந்து தங்களைத் தொடர்புகொள்ள மற்றும் உறுப்பினர் அடையாள அட்டையில் பதிவு செய்ய தங்களின் <strong>10 இலக்க மொபைல் எண்ணைப்</strong> பதிவிடவும்:'
+        },
+        invalid_mobile: { en: '\u274C Please enter a valid <strong>10-digit mobile number</strong>.', ta: '\u274C சரியான <strong>10 இலக்க மொபைல் எண்ணை</strong> உள்ளிடவும்.' },
+        ph_mobile: { en: 'Enter 10-digit mobile number...', ta: '10 இலக்க மொபைல் எண்ணை உள்ளிடவும்...' },
+        self_referral_title: { en: 'Don\'t use your same number for Dummy referrals', ta: 'போலி பரிந்துரைகளுக்கு உங்கள் எண்ணைப் பயன்படுத்த வேண்டாம்' },
+        self_referral_msg: { en: 'Please use a different mobile number to register.', ta: 'பதிவு செய்ய வேறு மொபைல் எண்ணைப் பயன்படுத்தவும்.' },
+        btn_enter_another: { en: 'Enter Another Number', ta: 'வேறு எண்ணை உள்ளிடவும்' },
+        already_registered_title: { en: 'This number is already registered', ta: 'இந்த எண் ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது' },
+        already_registered_msg: { en: 'This mobile number already has a membership card.', ta: 'இந்த மொபைல் எண்ணில் ஏற்கனவே உறுப்பினர் அட்டை உள்ளது.' },
+
+        // OTP
+        otp_sent: { en: '\uD83D\uDCDE An <strong>OTP</strong> has been sent to <strong>+91 {mobile}</strong>.<br><br>Please enter the <strong>6-digit OTP</strong>:', ta: '\uD83D\uDCDE <strong>+91 {mobile}</strong> எண்ணுக்கு <strong>OTP</strong> அனுப்பப்பட்டுள்ளது.<br><br><strong>6 இலக்க OTP</strong>ஐ உள்ளிடவும்:' },
+        invalid_otp: { en: '\u274C Please enter a valid <strong>6-digit OTP</strong>.', ta: '\u274C சரியான <strong>6 இலக்க OTP</strong>ஐ உள்ளிடவும்.' },
+        otp_resent: { en: '\u2705 OTP Resent!', ta: '\u2705 OTP மீண்டும் அனுப்பப்பட்டது!' },
+        otp_resend_fail: { en: '\u274C Failed to resend.', ta: '\u274C மீண்டும் அனுப்ப இயலவில்லை.' },
+        otp_resend_error: { en: '\u274C Error resending.', ta: '\u274C மீண்டும் அனுப்புவதில் பிழை.' },
+        btn_resend_otp: { en: 'Resend OTP', ta: 'OTP மீண்டும் அனுப்பு' },
+        btn_change_mobile: { en: 'Change Mobile Number', ta: 'மொபைல் எண்ணை மாற்று' },
+        ph_otp: { en: 'Enter 6-digit OTP...', ta: '6 இலக்க OTP உள்ளிடவும்...' },
+        otp_send_fail: { en: 'Could not send OTP. Please try again.', ta: 'OTP அனுப்ப இயலவில்லை. மீண்டும் முயற்சிக்கவும்.' },
+        invalid_otp_retry: { en: 'Invalid OTP. Please try again.', ta: 'தவறான OTP. மீண்டும் முயற்சிக்கவும்.' },
+        verification_failed: { en: 'Verification failed. Please try again.', ta: 'சரிபார்ப்பு தோல்வி. மீண்டும் முயற்சிக்கவும்.' },
+
+        // Returning user
+        welcome_back_pin: { en: '\uD83D\uDC4B Welcome back{name}!<br><br>\uD83D\uDD12 Please enter your <strong>4-digit security PIN</strong> to access your card:', ta: '\uD83D\uDC4B மீண்டும் வரவேற்கிறோம்{name}!<br><br>\uD83D\uDD12 உங்கள் அட்டையை அணுக <strong>4 இலக்க பாதுகாப்பு PIN</strong>ஐ உள்ளிடவும்:' },
+        ph_pin: { en: 'Enter 4-digit PIN...', ta: '4 இலக்க PIN உள்ளிடவும்...' },
+        welcome_back_card: { en: '\uD83D\uDC4B <strong>Welcome back!</strong> Your Tamil Nadu Vanigargalin Sangamam card is ready.', ta: '\uD83D\uDC4B <strong>மீண்டும் வரவேற்கிறோம்!</strong> உங்கள் தமிழ்நாடு வணிகர்களின் சங்கமம் அட்டை தயாராக உள்ளது.' },
+        mobile_verified_existing: { en: '\u2705 Mobile verified! Your <strong>Tamil Nadu Vanigargalin Sangamam</strong> card was already generated.', ta: '\u2705 மொபைல் சரிபார்க்கப்பட்டது! உங்கள் <strong>தமிழ்நாடு வணிகர்களின் சங்கமம்</strong> அட்டை ஏற்கனவே உருவாக்கப்பட்டுள்ளது.' },
+        details_incomplete_hint: { en: 'Your additional details are incomplete. Type anything to update them.', ta: 'உங்கள் கூடுதல் விவரங்கள் முழுமையடையவில்லை. புதுப்பிக்க ஏதாவது தட்டச்சு செய்யவும்.' },
+
+        // EPIC
+        mobile_verified_epic: { en: '\u2705 Mobile number verified!<br><br>Please enter your <strong>EPIC Number</strong> (Voter ID):', ta: '\u2705 மொபைல் எண் சரிபார்க்கப்பட்டது!<br><br>உங்கள் <strong>EPIC எண்ணை</strong> (வாக்காளர் அடையாள எண்) உள்ளிடவும்:' },
+        ph_epic: { en: 'Enter EPIC Number...', ta: 'EPIC எண்ணை உள்ளிடவும்...' },
+        voter_found: { en: '\u2705 <strong>Voter Found!</strong>', ta: '\u2705 <strong>வாக்காளர் கண்டறியப்பட்டார்!</strong>' },
+        is_this_correct: { en: 'Is this correct?', ta: 'இது சரியா?' },
+        btn_yes_correct: { en: 'Yes, Correct', ta: 'ஆம், சரி' },
+        btn_no_reenter: { en: 'No, Re-enter', ta: 'இல்லை, மீண்டும் உள்ளிடு' },
+        reenter_epic: { en: 'Okay! Please enter your <strong>EPIC Number</strong> again:', ta: 'சரி! உங்கள் <strong>EPIC எண்ணை</strong> மீண்டும் உள்ளிடவும்:' },
+        epic_not_found: { en: 'EPIC Number not found. Please check and try again.', ta: 'EPIC எண் கிடைக்கவில்லை. சரிபார்த்து மீண்டும் முயற்சிக்கவும்.' },
+        validate_fail: { en: 'Could not validate. Please try again.', ta: 'சரிபார்க்க இயலவில்லை. மீண்டும் முயற்சிக்கவும்.' },
+        yes_or_no: { en: 'Please type <strong>Yes</strong> or <strong>No</strong>.', ta: '<strong>ஆம்</strong> அல்லது <strong>இல்லை</strong> என தட்டச்சு செய்யவும்.' },
+
+        // Photo
+        upload_photo: { en: '\uD83D\uDCF7 Now please <strong>upload your photo</strong> using the buttons below.', ta: '\uD83D\uDCF7 கீழே உள்ள பொத்தான்களைப் பயன்படுத்தி உங்கள் <strong>புகைப்படத்தைப் பதிவேற்றவும்</strong>.' },
+        btn_upload_photo: { en: 'Upload Photo', ta: 'புகைப்படம் பதிவேற்று' },
+        btn_camera: { en: 'Camera', ta: 'கேமரா' },
+        please_upload_photo: { en: '\uD83D\uDCF7 Please use the buttons below to <strong>upload your photo</strong>.', ta: '\uD83D\uDCF7 உங்கள் <strong>புகைப்படத்தைப் பதிவேற்ற</strong> கீழே உள்ள பொத்தான்களைப் பயன்படுத்தவும்.' },
+        photo_uploaded: { en: 'Photo uploaded', ta: 'புகைப்படம் பதிவேற்றப்பட்டது' },
+        photo_too_large: { en: '\u274C File size exceeds <strong>5 MB</strong>. Please upload a smaller photo.', ta: '\u274C கோப்பு அளவு <strong>5 MB</strong>ஐ தாண்டிவிட்டது. சிறிய புகைப்படத்தைப் பதிவேற்றவும்.' },
+        photo_upload_failed: { en: '\u274C Photo upload failed. Please try again.', ta: '\u274C புகைப்படம் பதிவேற்றம் தோல்வி. மீண்டும் முயற்சிக்கவும்.' },
+        btn_reupload: { en: 'Re-upload Photo', ta: 'மீண்டும் பதிவேற்று' },
+        ph_upload: { en: 'Click the upload button below...', ta: 'கீழே உள்ள பதிவேற்று பொத்தானை அழுத்தவும்...' },
+
+        // PIN
+        set_pin: { en: '<i class="bi bi-shield-lock"></i> Please set a <strong>4-digit PIN</strong> for your membership.', ta: '<i class="bi bi-shield-lock"></i> உங்கள் உறுப்பினருக்கான <strong>4 இலக்க PIN</strong>ஐ உருவாக்குங்கள்.' },
+        pin_hint: { en: 'This PIN will be used to verify your identity when accessing your card from another device.', ta: 'தாங்கள் ஒவ்வொரு முறையும் பயன்படுத்தும் போது தங்கள் மொபைல் எண் மற்றும் தாங்கள் உருவாக்கும் கடவுச்சொல் பயன்படுத்தி உள்ளீடு செய்ய முடியும். பிறகு அதை உறுதிப்படுத்துங்கள்.' },
+        pin_4digits: { en: 'Please enter exactly <strong>4 digits</strong> for your PIN.', ta: 'உங்கள் PIN க்கு சரியாக <strong>4 இலக்கங்களை</strong> உள்ளிடவும்.' },
+        confirm_pin: { en: '<i class="bi bi-shield-check"></i> Please <strong>re-enter your PIN</strong> to confirm:', ta: '<i class="bi bi-shield-check"></i> உறுதிப்படுத்த உங்கள் <strong>PIN ஐ மீண்டும் உள்ளிடவும்</strong>:' },
+        ph_reenter_pin: { en: 'Re-enter PIN to confirm...', ta: 'PIN ஐ மீண்டும் உள்ளிடவும்...' },
+        pin_mismatch: { en: '<i class="bi bi-x-circle"></i> PINs do not match. Please set your <strong>4-digit PIN</strong> again:', ta: '<i class="bi bi-x-circle"></i> PIN பொருந்தவில்லை. உங்கள் <strong>4 இலக்க PIN</strong>ஐ மீண்டும் அமைக்கவும்:' },
+        pin_set_success: { en: '<i class="bi bi-check-circle"></i> PIN set successfully!', ta: '<i class="bi bi-check-circle"></i> PIN வெற்றிகரமாக அமைக்கப்பட்டது!' },
+        enter_4digit_pin: { en: 'Please enter your <strong>4-digit PIN</strong>.', ta: 'உங்கள் <strong>4 இலக்க PIN</strong>ஐ உள்ளிடவும்.' },
+        invalid_pin: { en: 'Invalid PIN.', ta: 'தவறான PIN.' },
+
+        // Additional Details
+        ask_additional: { en: '\uD83D\uDCDD Would you like to add <strong>additional details</strong>?', ta: '\uD83D\uDCDD <strong>கூடுதல் விவரங்களைச்</strong> சேர்க்க விரும்புகிறீர்களா?' },
+        additional_hint: { en: 'Adding details (DOB, Blood Group, Address) will complete your membership card. You can skip and fill them later via QR code.', ta: 'விவரங்களைச் (பிறந்த தேதி, இரத்தக் குழு, முகவரி) சேர்ப்பது உங்கள் உறுப்பினர் அட்டையை முழுமையாக்கும். இப்போது தவிர்த்து பின்னர் QR குறியீடு மூலம் நிரப்பலாம்.' },
+        btn_add_details: { en: 'Add Details', ta: 'விவரங்களைச் சேர்' },
+        btn_skip: { en: 'Skip', ta: 'தவிர்' },
+        tap_add_or_skip: { en: 'Please tap <strong>Add Details</strong> or <strong>Skip</strong>.', ta: '<strong>விவரங்களைச் சேர்</strong> அல்லது <strong>தவிர்</strong> அழுத்தவும்.' },
+
+        // DOB
+        select_dob: { en: '\uD83C\uDF82 Please select your <strong>Date of Birth</strong>:', ta: '\uD83C\uDF82 உங்கள் <strong>பிறந்த தேதியைத்</strong> தேர்ந்தெடுக்கவும்:' },
+        btn_confirm_dob: { en: 'Confirm DOB', ta: 'பிறந்த தேதியை உறுதிப்படுத்து' },
+        select_date: { en: '\u274C Please select a date.', ta: '\u274C ஒரு தேதியைத் தேர்ந்தெடுக்கவும்.' },
+        use_calendar: { en: 'Please use the <strong>calendar picker</strong> above to select your date of birth.', ta: 'உங்கள் பிறந்த தேதியைத் தேர்ந்தெடுக்க மேலே உள்ள <strong>நாட்காட்டியைப்</strong> பயன்படுத்தவும்.' },
+
+        // Blood Group
+        select_blood: { en: '\uD83E\uDE78 Please select your <strong>Blood Group</strong>:', ta: '\uD83E\uDE78 உங்கள் <strong>இரத்தக் குழுவைத்</strong> தேர்ந்தெடுக்கவும்:' },
+        use_blood_buttons: { en: 'Please tap one of the <strong>blood group buttons</strong> above to select.', ta: 'தேர்ந்தெடுக்க மேலே உள்ள <strong>இரத்தக் குழு பொத்தான்களில்</strong> ஒன்றை அழுத்தவும்.' },
+
+        // Address
+        enter_address: { en: '\uD83C\uDFE0 Please enter your <strong>full address</strong> <span style="color:#888;font-size:0.8rem;">(max 70 characters)</span>:', ta: '\uD83C\uDFE0 உங்கள் <strong>முழு முகவரியை</strong> உள்ளிடவும் <span style="color:#888;font-size:0.8rem;">(அதிகபட்சம் 70 எழுத்துகள்)</span>:' },
+        ph_address: { en: 'Enter your address...', ta: 'உங்கள் முகவரியை உள்ளிடவும்...' },
+        btn_confirm_address: { en: 'Confirm Address', ta: 'முகவரியை உறுதிப்படுத்து' },
+        enter_address_err: { en: '\u274C Please enter your address.', ta: '\u274C உங்கள் முகவரியை உள்ளிடவும்.' },
+        use_address_box: { en: 'Please use the <strong>address box</strong> above and tap <strong>Confirm Address</strong>.', ta: 'மேலே உள்ள <strong>முகவரிப் பெட்டியைப்</strong> பயன்படுத்தி <strong>முகவரியை உறுதிப்படுத்து</strong> அழுத்தவும்.' },
+
+        // Confirmation
+        confirm_details: { en: '\uD83D\uDCCB <strong>Please confirm your details:</strong>', ta: '\uD83D\uDCCB <strong>உங்கள் விவரங்களை உறுதிப்படுத்தவும்:</strong>' },
+        confirm_updated: { en: '\uD83D\uDCCB <strong>Please confirm your updated details:</strong>', ta: '\uD83D\uDCCB <strong>உங்கள் புதுப்பிக்கப்பட்ட விவரங்களை உறுதிப்படுத்தவும்:</strong>' },
+        save_these: { en: 'Save these details?', ta: 'இந்த விவரங்களைச் சேமிக்கவா?' },
+        ready_generate: { en: 'Ready to generate your <strong>Tamil Nadu Vanigargalin Sangamam Card</strong>?', ta: 'உங்கள் <strong>தமிழ்நாடு வணிகர்களின் சங்கமம் அட்டையை</strong> உருவாக்க தயாரா?' },
+        btn_confirm_generate: { en: 'Confirm & Generate', ta: 'உறுதிப்படுத்து & உருவாக்கு' },
+        btn_save_details: { en: 'Save Details', ta: 'விவரங்களைச் சேமி' },
+        btn_cancel: { en: 'Cancel', ta: 'ரத்துசெய்' },
+        yes_to_confirm: { en: 'Please type <strong>Yes</strong> to confirm or <strong>No</strong> to cancel.', ta: 'உறுதிப்படுத்த <strong>ஆம்</strong> அல்லது ரத்து செய்ய <strong>இல்லை</strong> என தட்டச்சு செய்யவும்.' },
+        cancelled_start_over: { en: 'Cancelled. Please enter your <strong>EPIC Number</strong> to start over:', ta: 'ரத்து செய்யப்பட்டது. மீண்டும் தொடங்க உங்கள் <strong>EPIC எண்ணை</strong> உள்ளிடவும்:' },
+        update_cancelled: { en: 'Update cancelled. You can update your details anytime from the sidebar menu.', ta: 'புதுப்பிப்பு ரத்து செய்யப்பட்டது. பக்கப்பட்டி மெனுவில் இருந்து எப்போது வேண்டுமானாலும் விவரங்களைப் புதுப்பிக்கலாம்.' },
+        ph_confirm: { en: 'Type "yes" to confirm...', ta: '"ஆம்" என தட்டச்சு செய்யவும்...' },
+        details_pending: { en: 'Details Pending', ta: 'விவரங்கள் நிலுவையில்' },
+        lbl_update_details: { en: 'Update Details', ta: 'விவரங்களைப் புதுப்பி' },
+
+        // Card Generation
+        uploading_photo: { en: '\u2B06\uFE0F Uploading your photo...', ta: '\u2B06\uFE0F உங்கள் புகைப்படம் பதிவேற்றப்படுகிறது...' },
+        generating_card: { en: '\u2699\uFE0F Generating your <strong>Tamil Nadu Vanigargalin Sangamam Card</strong>... Please wait.', ta: '\u2699\uFE0F உங்கள் <strong>தமிழ்நாடு வணிகர்களின் சங்கமம் அட்டை</strong> உருவாக்கப்படுகிறது... காத்திருக்கவும்.' },
+        card_generated: { en: '\uD83C\uDF89 <strong>Your Tamil Nadu Vanigargalin Sangamam Card has been generated!</strong>', ta: '\uD83C\uDF89 <strong>உங்கள் தமிழ்நாடு வணிகர்களின் சங்கமம் அட்டை உருவாக்கப்பட்டது!</strong>' },
+        card_gen_fail: { en: 'Card generation failed. Please try again.', ta: 'அட்டை உருவாக்கம் தோல்வி. மீண்டும் முயற்சிக்கவும்.' },
+        details_skipped: { en: 'Some details were skipped.', ta: 'சில விவரங்கள் தவிர்க்கப்பட்டன.' },
+        btn_update_now: { en: 'Update Details Now', ta: 'இப்போது விவரங்களைப் புதுப்பி' },
+        details_updated: { en: '<i class="bi bi-check-circle" style="color:#2e7d32;"></i> <strong>Details updated successfully!</strong>', ta: '<i class="bi bi-check-circle" style="color:#2e7d32;"></i> <strong>விவரங்கள் வெற்றிகரமாகப் புதுப்பிக்கப்பட்டன!</strong>' },
+
+        // Card preview buttons
+        btn_view_card: { en: 'View Full Card', ta: 'முழு அட்டையைக் காண்க' },
+        btn_download: { en: 'Download', ta: 'பதிவிறக்கு' },
+        btn_share: { en: 'Share', ta: 'பகிர்' },
+        btn_view_card_short: { en: 'View Card', ta: 'அட்டையைக் காண்க' },
+        btn_download_card: { en: 'Download Card', ta: 'அட்டையைப் பதிவிறக்கு' },
+
+        // Done state
+        ready_another: { en: '\uD83D\uDC4B Ready for another card?<br><br>\uD83D\uDCF1 Please enter your <strong>10-digit mobile number</strong>:', ta: '\uD83D\uDC4B மற்றொரு அட்டைக்குத் தயாரா?<br><br>\uD83D\uDCF1 உங்கள் <strong>10 இலக்க மொபைல் எண்ணை</strong> உள்ளிடவும்:' },
+        type_anything_hint: { en: 'Type anything to generate another card, or use the <strong>menu</strong> (<i class="bi bi-list"></i>) for more options.', ta: 'மற்றொரு அட்டையை உருவாக்க ஏதாவது தட்டச்சு செய்யவும், அல்லது மேலும் விருப்பங்களுக்கு <strong>மெனுவைப்</strong> (<i class="bi bi-list"></i>) பயன்படுத்தவும்.' },
+        ph_type_msg: { en: 'Type a message...', ta: 'செய்தி தட்டச்சு செய்யவும்...' },
+        ph_add_or_skip: { en: 'Type "add" or "skip"...', ta: '"சேர்" அல்லது "தவிர்" என தட்டச்சு...' },
+
+        // Update details
+        lets_complete: { en: '<i class="bi bi-pencil-square"></i> Let\'s complete your membership details!', ta: '<i class="bi bi-pencil-square"></i> உங்கள் உறுப்பினர் விவரங்களை நிரப்புவோம்!' },
+
+        // Sidebar
+        sb_profile: { en: 'Profile', ta: 'சுயவிவரம்' },
+        sb_name: { en: 'Name', ta: 'பெயர்' },
+        sb_member_id: { en: 'Member ID', ta: 'உறுப்பினர் எண்' },
+        sb_epic: { en: 'EPIC No', ta: 'EPIC எண்' },
+        sb_mobile: { en: 'Mobile', ta: 'மொபைல்' },
+        sb_membership: { en: 'Membership', ta: 'உறுப்பினர்' },
+        sb_assembly: { en: 'Assembly', ta: 'சட்டமன்றத் தொகுதி' },
+        sb_district: { en: 'District', ta: 'மாவட்டம்' },
+        sb_dob: { en: 'DOB', ta: 'பிறந்த தேதி' },
+        sb_age: { en: 'Age', ta: 'வயது' },
+        sb_blood: { en: 'Blood Group', ta: 'இரத்தக் குழு' },
+        sb_address: { en: 'Address', ta: 'முகவரி' },
+        sb_not_registered: { en: 'Not registered', ta: 'பதிவு செய்யவில்லை' },
+        sb_vanigam_member: { en: 'Vanigam Member', ta: 'வணிகம் உறுப்பினர்' },
+        sb_no_card: { en: 'No membership card yet.<br>Complete the registration to see your profile.', ta: 'உறுப்பினர் அட்டை இன்னும் இல்லை.<br>உங்கள் சுயவிவரத்தைக் காண பதிவை நிறைவு செய்யவும்.' },
+        sb_referrals: { en: 'Referrals', ta: 'பரிந்துரைகள்' },
+        sb_organizer_ready: { en: 'Organizer Ready', ta: 'நிர்வாகி தகுதி பெற்றவர்' },
+        sb_more: { en: 'more', ta: 'மேலும்' },
+        sb_to_organizer: { en: 'to become Organizer', ta: 'நிர்வாகி ஆக' },
+        sb_update_details: { en: 'Update Details', ta: 'விவரங்களைப் புதுப்பி' },
+        sb_update_details_desc: { en: 'Complete your membership details', ta: 'உங்கள் உறுப்பினர் விவரங்களை நிரப்பவும்' },
+        sb_refer: { en: 'Refer a Friend', ta: 'நண்பரைப் பரிந்துரை செய்' },
+        sb_refer_desc: { en: 'Share your referral link', ta: 'உங்கள் பரிந்துரை இணைப்பைப் பகிரவும்' },
+        sb_organizer: { en: 'Become an Organizer', ta: 'நிர்வாகியாக இணைய' },
+        sb_organizer_desc: { en: 'Need 25+ referrals to qualify', ta: 'தகுதி பெற 25+ பரிந்துரைகள் தேவை' },
+        sb_help: { en: 'Help & Support', ta: 'உதவி & ஆதரவு' },
+        sb_help_desc: { en: 'Get assistance or report issues', ta: 'உதவி பெறுங்கள் அல்லது சிக்கல்களைத் தெரிவிக்கவும்' },
+        sb_logout: { en: 'Logout', ta: 'வெளியேறு' },
+        sb_logout_desc: { en: 'Sign out and clear session', ta: 'வெளியேறி அமர்வை அழிக்கவும்' },
+        sb_drag_hint: { en: 'Drag to rotate', ta: 'சுழற்ற இழுக்கவும்' },
+
+        // Referral
+        ref_your_link: { en: 'Your Referral Link', ta: 'உங்கள் பரிந்துரை இணைப்பு' },
+        ref_copy: { en: 'Copy Link', ta: 'இணைப்பை நகலெடு' },
+        ref_share: { en: 'Share', ta: 'பகிர்' },
+        ref_share_link: { en: 'Share Link', ta: 'இணைப்பைப் பகிர்' },
+        ref_copied: { en: '\u2705 Referral link copied!', ta: '\u2705 பரிந்துரை இணைப்பு நகலெடுக்கப்பட்டது!' },
+        ref_copied_toast: { en: '✅ Referral link copied!', ta: '✅ பரிந்துரை இணைப்பு நகலெடுக்கப்பட்டது!' },
+        ref_complete_first: { en: '\u274C Please complete registration first to get your referral link.', ta: '\u274C உங்கள் பரிந்துரை இணைப்பைப் பெற முதலில் பதிவை நிறைவு செய்யவும்.' },
+        ref_fail: { en: 'Could not generate referral link', ta: 'பரிந்துரை இணைப்பை உருவாக்க இயலவில்லை' },
+        ref_share_text: { en: 'Join Vanigam and get your free membership card!', ta: 'வணிகர்களின் சங்கமத்தில் இணைந்து உங்கள் இலவச உறுப்பினர் அட்டையைப் பெறுங்கள்!' },
+        ref_share_text_personal: {
+          en: 'I have joined Tamil Nadu Vanigargalin Sangamam for the growth and protection of traders. I request you also to join using this link and get many benefits.',
+          ta: '{name} ஆகிய நான் வணிகர்களின் வளர்ச்சிக்கும் பாதுகாப்பிற்கும் வணிகர்கள் அரசியலில் அங்கீகாரத்தையும் அதிகாரத்தையும் பெற வேண்டி தமிழ்நாடு வணிகர்களின் சங்கமத்தில் இணைந்துள்ளேன். தங்களையும் இந்த link ஐ வைத்து இணைத்துக் கொண்டு பல்வேறு பயன்களைப் பெறக் கேட்டுக் கொள்கிறேன்.'
+        },
+
+        // Organizer
+        org_title: { en: 'Become an Organizer', ta: 'நிர்வாகியாக இணைய' },
+        org_congrats: { en: 'Congratulations!', ta: 'வாழ்த்துக்கள்!' },
+        org_qualify: { en: 'You have <strong>{count} referrals</strong> and qualify to become an Organizer. Our team will contact you soon.', ta: 'உங்களிடம் <strong>{count} பரிந்துரைகள்</strong> உள்ளன, நிர்வாகியாக இணையத் தகுதி பெற்றுள்ளீர்கள். எங்கள் குழு விரைவில் தொடர்பு கொள்ளும்.' },
+        org_need_more: { en: 'You need <strong>{count} more referrals</strong> to become an Organizer.', ta: 'நிர்வாகியாக இணைய <strong>{count} மேலும் பரிந்துரைகள்</strong> தேவை.' },
+        org_share_hint: { en: 'Share your referral link to invite more members!', ta: 'மேலும் உறுப்பினர்களை அழைக்க உங்கள் பரிந்துரை இணைப்பைப் பகிரவும்!' },
+        org_interest_welcome: {
+          en: 'Those who are interested in joining as an organizer in Tamil Nadu Vanigargalin Sangamam are welcome.',
+          ta: 'தமிழ்நாடு வணிகர்களின் சங்கமத்தில் நிர்வாகியாக இணைய விருப்பம் உள்ளவர்கள் வரவேற்கப்படுகிறார்கள்.'
+        },
+        org_min_25: {
+          en: 'We request you to add at least 25 members using your referral link.',
+          ta: 'தங்களுக்கான link ஐ பயன்படுத்தி குறைந்தபட்சம் 25 உறுப்பினர்களை இணைக்கக் கேட்டுக்கொள்கிறோம்.'
+        },
+        org_complete_first: { en: '\u274C Please complete registration first.', ta: '\u274C முதலில் பதிவை நிறைவு செய்யவும்.' },
+
+        // Help
+        help_title: { en: 'Help & Support', ta: 'உதவி & ஆதரவு' },
+        help_contact_hint: { en: 'For any issues with card generation, referrals, or membership, please contact us via the above channels.', ta: 'அட்டை உருவாக்கம், பரிந்துரைகள் அல்லது உறுப்பினர் தொடர்பான ஏதேனும் சிக்கல்களுக்கு, மேலே உள்ள வழிகளில் எங்களைத் தொடர்பு கொள்ளவும்.' },
+
+        // General
+        something_wrong: { en: '\u274C Something went wrong. Please try again.', ta: '\u274C ஏதோ பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.' },
+        failed_save: { en: 'Failed to save details.', ta: 'விவரங்களைச் சேமிக்கத் தோல்வி.' },
+
+        // Language toggle
+        lang_label: { en: 'Language', ta: 'மொழி' },
+        lang_en: { en: 'English', ta: 'English' },
+        lang_ta: { en: 'தமிழ்', ta: 'தமிழ்' },
+
+        // Summary labels
+        lbl_name: { en: 'Name', ta: 'பெயர்' },
+        lbl_member_id: { en: 'Member ID', ta: 'உறுப்பினர் எண்' },
+        lbl_epic: { en: 'EPIC No', ta: 'EPIC எண்' },
+        lbl_assembly: { en: 'Assembly', ta: 'சட்டமன்றத் தொகுதி' },
+        lbl_district: { en: 'District', ta: 'மாவட்டம்' },
+        lbl_mobile: { en: 'Mobile', ta: 'மொபைல்' },
+        lbl_dob: { en: 'DOB', ta: 'பிறந்த தேதி' },
+        lbl_blood: { en: 'Blood Group', ta: 'இரத்தக் குழு' },
+        lbl_address: { en: 'Address', ta: 'முகவரி' },
+        lbl_status: { en: 'Status', ta: 'நிலை' },
+      };
+
+      function L(key, replacements) {
+        const entry = T[key];
+        if (!entry) return key;
+        let text = entry[currentLang] || entry['en'] || key;
+        if (replacements) {
+          for (const [k, v] of Object.entries(replacements)) {
+            text = text.replace('{' + k + '}', v);
+          }
+        }
+        return text;
+      }
+
+      function setLang(lang) {
+        currentLang = lang;
+        localStorage.setItem('vanigam_lang', lang);
+        // Update static header text
+        document.querySelector('.chat-header .info h4').textContent = L('header_title');
+        document.querySelector('.chat-header .info .status').textContent = L('header_subtitle');
+        // Update input placeholder based on current state
+        const inp = document.getElementById('messageInput');
+        if (inp && !inp.disabled) {
+          if (state === S.WELCOME || state === S.DONE) inp.placeholder = L('ph_type_msg');
+          else if (state === S.AWAIT_MOBILE) inp.placeholder = L('ph_mobile');
+          else if (state === S.AWAIT_OTP) inp.placeholder = L('ph_otp');
+          else if (state === S.AWAIT_EPIC) inp.placeholder = L('ph_epic');
+          else if (state === S.AWAIT_PIN || state === S.AWAIT_RETURNING_PIN) inp.placeholder = L('ph_pin');
+          else if (state === S.AWAIT_PIN_CONFIRM) inp.placeholder = L('ph_reenter_pin');
+          else if (state === S.AWAIT_PHOTO) inp.placeholder = L('ph_upload');
+          else if (state === S.ASK_ADDITIONAL) inp.placeholder = L('ph_add_or_skip');
+          else if (state === S.CONFIRM_ALL) inp.placeholder = L('ph_confirm');
+        }
+        // Refresh sidebar if open
+        updateSidebarContent();
+      }
+
       /* ── localStorage ── */
       const LS_KEY = 'vanigam_member';
       function saveUser(data) {
@@ -719,8 +991,8 @@
 
         if (user && user.hasCard && user.memberData) {
           const m = user.memberData;
-          sbName.textContent = m.name || 'Vanigam Member';
-          sbId.textContent = m.unique_id || 'Member';
+          sbName.textContent = m.name || L('sb_vanigam_member');
+          sbId.textContent = m.unique_id || L('sb_membership');
 
           // Update sidebar avatar with user photo
           const sbAvatar = document.querySelector('.sidebar-header .sb-avatar');
@@ -729,18 +1001,18 @@
           }
 
           // Profile Section
-          html += '<div class="sb-section"><div class="sb-section-title">Profile</div>';
+          html += '<div class="sb-section"><div class="sb-section-title">' + L('sb_profile') + '</div>';
           html += '<div class="sb-profile">';
           const fields = [
-            ['Name', m.name], ['Member ID', m.unique_id], ['EPIC No', m.epic_no],
-            ['Mobile', '+91 ' + (user.mobile || m.mobile || '')],
-            ['Membership', m.membership || 'Member'],
-            ['Assembly', m.assembly], ['District', m.district]
+            [L('sb_name'), m.name], [L('sb_member_id'), m.unique_id], [L('sb_epic'), m.epic_no],
+            [L('sb_mobile'), '+91 ' + (user.mobile || m.mobile || '')],
+            [L('sb_membership'), m.membership || 'Member'],
+            [L('sb_assembly'), m.assembly], [L('sb_district'), m.district]
           ];
-          if (m.dob) fields.push(['DOB', m.dob]);
-          if (m.age) fields.push(['Age', m.age]);
-          if (m.blood_group) fields.push(['Blood Group', m.blood_group]);
-          if (m.address) fields.push(['Address', m.address]);
+          if (m.dob) fields.push([L('sb_dob'), m.dob]);
+          if (m.age) fields.push([L('sb_age'), m.age]);
+          if (m.blood_group) fields.push([L('sb_blood'), m.blood_group]);
+          if (m.address) fields.push([L('sb_address'), m.address]);
           for (const [lbl, val] of fields) {
             if (!val) continue;
             html += '<div class="profile-row"><span class="p-label">' + lbl + '</span><span class="p-value">' + val + '</span></div>';
@@ -795,21 +1067,21 @@
           // Controls
           html += '<div class="card3d-controls">';
           html += '<button class="card3d-btn" onclick="rotate3dCard(-1)" title="Rotate Left"><i class="bi bi-arrow-counterclockwise"></i></button>';
-          html += '<span class="card3d-hint"><i class="bi bi-hand-index-thumb"></i> Drag to rotate</span>';
+          html += '<span class="card3d-hint"><i class="bi bi-hand-index-thumb"></i> ' + L('sb_drag_hint') + '</span>';
           html += '<button class="card3d-btn" onclick="rotate3dCard(1)" title="Rotate Right"><i class="bi bi-arrow-clockwise"></i></button>';
           html += '</div>';
 
           // Action buttons
           html += '<div class="sb-card-actions" style="margin-top:12px;">';
-          html += '<button class="dl-btn" onclick="window.open(\'' + cardUrl + '\',\'_blank\')"><i class="bi bi-eye"></i> View Card</button>';
-          html += '<button class="dl-btn" onclick="window.open(\'' + cardUrl + '\',\'_blank\')"><i class="bi bi-download"></i> Download Card</button>';
+          html += '<button class="dl-btn" onclick="window.open(\'' + cardUrl + '\',\'_blank\')"><i class="bi bi-eye"></i> ' + L('btn_view_card_short') + '</button>';
+          html += '<button class="dl-btn" onclick="window.open(\'' + cardUrl + '\',\'_blank\')"><i class="bi bi-download"></i> ' + L('btn_download_card') + '</button>';
           html += '</div></div></div>';
         } else {
-          sbName.textContent = 'Vanigam Member';
-          sbId.textContent = 'Not registered';
+          sbName.textContent = L('sb_vanigam_member');
+          sbId.textContent = L('sb_not_registered');
           html += '<div class="sb-section" style="text-align:center;padding:40px 18px;">';
           html += '<i class="bi bi-person-badge" style="font-size:3rem;color:#ccc;"></i>';
-          html += '<p style="color:#888;margin-top:12px;font-size:0.9rem;">No membership card yet.<br>Complete the registration to see your profile.</p>';
+          html += '<p style="color:#888;margin-top:12px;font-size:0.9rem;">' + L('sb_no_card') + '</p>';
           html += '</div>';
         }
 
@@ -820,33 +1092,38 @@
           html += '<i class="bi bi-people-fill" style="font-size:1.5rem;color:#2e7d32;"></i>';
           html += '<div style="text-align:center;">';
           html += '<div style="font-size:1.4rem;font-weight:800;color:#1b5e20;">' + rc + '</div>';
-          html += '<div style="font-size:0.72rem;color:#555;font-weight:500;">Referrals</div>';
+          html += '<div style="font-size:0.72rem;color:#555;font-weight:500;">' + L('sb_referrals') + '</div>';
           html += '</div>';
           html += '<div style="width:1px;height:30px;background:#aed581;"></div>';
           html += '<div style="text-align:center;">';
           if (rc >= 25) {
             html += '<i class="bi bi-star-fill" style="font-size:1.2rem;color:#f9a825;"></i>';
-            html += '<div style="font-size:0.72rem;color:#f57f17;font-weight:600;">Organizer Ready</div>';
+            html += '<div style="font-size:0.72rem;color:#f57f17;font-weight:600;">' + L('sb_organizer_ready') + '</div>';
           } else {
-            html += '<div style="font-size:0.85rem;font-weight:700;color:#555;">' + (25 - rc) + ' more</div>';
-            html += '<div style="font-size:0.68rem;color:#888;">to become Organizer</div>';
+            html += '<div style="font-size:0.85rem;font-weight:700;color:#555;">' + (25 - rc) + ' ' + L('sb_more') + '</div>';
+            html += '<div style="font-size:0.68rem;color:#888;">' + L('sb_to_organizer') + '</div>';
           }
           html += '</div></div>';
         }
 
         // Menu Items
         if (user && user.memberData && !user.memberData.details_completed) {
-          html += '<div class="sb-menu-item" onclick="doMenuUpdateDetails()" style="background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.3);"><i class="bi bi-pencil-square" style="color:#e65100;"></i><div class="sb-menu-text"><h5 style="color:#e65100;">Update Details</h5><p>Complete your membership details</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
+          html += '<div class="sb-menu-item" onclick="doMenuUpdateDetails()" style="background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.3);"><i class="bi bi-pencil-square" style="color:#e65100;"></i><div class="sb-menu-text"><h5 style="color:#e65100;">' + L('sb_update_details') + '</h5><p>' + L('sb_update_details_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         }
         html += '<div class="sb-menu-item" style="flex-wrap:wrap;">';
-        html += '<i class="bi bi-share"></i><div class="sb-menu-text" onclick="doMenuRefer()" style="cursor:pointer;"><h5>Refer a Friend</h5><p>Share your referral link</p></div>';
+        html += '<i class="bi bi-share"></i><div class="sb-menu-text" onclick="doMenuRefer()" style="cursor:pointer;"><h5>' + L('sb_refer') + '</h5><p>' + L('sb_refer_desc') + '</p></div>';
         html += '<div style="display:flex;gap:6px;">';
         html += '<button onclick="event.stopPropagation();sidebarCopyRef()" style="border:none;background:#e8f5e9;color:#2e7d32;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;" title="Copy Referral Link"><i class="bi bi-clipboard"></i></button>';
         html += '<button onclick="event.stopPropagation();sidebarShareRef()" style="border:none;background:#e8f5e9;color:#2e7d32;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;" title="Share Referral Link"><i class="bi bi-send"></i></button>';
         html += '</div></div>';
-        html += '<div class="sb-menu-item" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i><div class="sb-menu-text"><h5>Become an Organizer</h5><p>Need 25+ referrals to qualify</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
-        html += '<div class="sb-menu-item" onclick="doMenuHelp()"><i class="bi bi-question-circle"></i><div class="sb-menu-text"><h5>Help & Support</h5><p>Get assistance or report issues</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
-        html += '<div class="sb-menu-item" onclick="doMenuLogout()"><i class="bi bi-box-arrow-right" style="color:#d32f2f;"></i><div class="sb-menu-text"><h5 style="color:#d32f2f;">Logout</h5><p>Sign out and clear session</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
+        html += '<div class="sb-menu-item" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i><div class="sb-menu-text"><h5>' + L('sb_organizer') + '</h5><p>' + L('sb_organizer_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
+        html += '<div class="sb-menu-item" onclick="doMenuHelp()"><i class="bi bi-question-circle"></i><div class="sb-menu-text"><h5>' + L('sb_help') + '</h5><p>' + L('sb_help_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
+        // Language Toggle
+        html += '<div class="sb-menu-item" style="cursor:default;"><i class="bi bi-translate"></i><div class="sb-menu-text"><h5>' + L('lang_label') + '</h5><p>English / தமிழ்</p></div>';
+        html += '<div style="position:relative;width:48px;height:26px;border-radius:13px;cursor:pointer;transition:background 0.3s;background:' + (currentLang === 'ta' ? '#2e7d32' : '#ccc') + ';flex-shrink:0;" onclick="toggleLang()">';
+        html += '<div style="position:absolute;top:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left 0.3s;left:' + (currentLang === 'ta' ? '24px' : '2px') + ';"></div>';
+        html += '</div></div>';
+        html += '<div class="sb-menu-item" onclick="doMenuLogout()"><i class="bi bi-box-arrow-right" style="color:#d32f2f;"></i><div class="sb-menu-text"><h5 style="color:#d32f2f;">' + L('sb_logout') + '</h5><p>' + L('sb_logout_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
 
         sidebarBody.innerHTML = html;
         init3dCard();
@@ -899,11 +1176,15 @@
         });
       }
 
+      window.toggleLang = function () {
+        setLang(currentLang === 'en' ? 'ta' : 'en');
+      };
+
       window.doMenuRefer = async function () {
         closeSidebar();
         const user = getUser();
         if (!user || !user.memberData || !user.memberData.unique_id) {
-          await botReply('\u274C Please complete registration first to get your referral link.', 600);
+          await botReply(L('ref_complete_first'), 600);
           return;
         }
         try {
@@ -912,32 +1193,35 @@
           hideTyping();
           if (res.success) {
             const link = res.referral_link;
-            let h = '<i class="bi bi-share" style="color:#2e7d32;"></i> <strong>Your Referral Link</strong>';
+            let h = '<i class="bi bi-share" style="color:#2e7d32;"></i> <strong>' + L('ref_your_link') + '</strong>';
             h += '<div style="margin-top:10px;padding:12px;background:#f0f9f1;border-radius:10px;border:1px solid #c8e6c9;">';
             h += '<code style="word-break:break-all;font-size:0.85rem;color:#1b5e20;">' + link + '</code>';
             h += '</div>';
             h += '<div style="margin-top:8px;display:flex;gap:8px;">';
-            h += '<button class="action-btn confirm" onclick="copyReferral(\'' + link + '\')" style="flex:1;"><i class="bi bi-clipboard"></i> Copy Link</button>';
-            h += '<button class="action-btn confirm" onclick="shareReferral(\'' + link + '\')" style="flex:1;"><i class="bi bi-send"></i> Share</button>';
+            h += '<button class="action-btn confirm" onclick="copyReferral(\'' + link + '\')" style="flex:1;"><i class="bi bi-clipboard"></i> ' + L('ref_copy') + '</button>';
+            h += '<button class="action-btn confirm" onclick="shareReferral(\'' + link + '\')" style="flex:1;"><i class="bi bi-send"></i> ' + L('ref_share') + '</button>';
             h += '</div>';
-            h += '<div style="margin-top:8px;font-size:0.8rem;color:#666;"><i class="bi bi-people"></i> Referrals: <strong>' + res.referral_count + '</strong> / 25</div>';
+            h += '<div style="margin-top:8px;font-size:0.8rem;color:#666;"><i class="bi bi-people"></i> ' + L('sb_referrals') + ': <strong>' + res.referral_count + '</strong> / 25</div>';
             await botReply(h, 800);
           } else {
             console.error('Referral API error:', res);
-            await botReply('\u274C Could not generate referral link: ' + (res.message || 'Unknown error'), 600);
+            await botReply('\u274C ' + L('ref_fail') + ': ' + (res.message || ''), 600);
           }
-        } catch(e) { hideTyping(); console.error('Referral exception:', e); await botReply('\u274C Something went wrong: ' + e.message, 600); }
+        } catch(e) { hideTyping(); console.error('Referral exception:', e); await botReply(L('something_wrong') + ' ' + e.message, 600); }
       };
 
       window.copyReferral = function (link) {
-        navigator.clipboard.writeText(link).then(() => { botMsg('\u2705 Referral link copied!'); });
+        navigator.clipboard.writeText(link).then(() => { botMsg(L('ref_copied')); });
       };
 
       window.shareReferral = function (link) {
+        const user = getUser();
+        const memberName = (user && user.memberData) ? user.memberData.name || '' : '';
+        const shareText = currentLang === 'ta' ? L('ref_share_text_personal', { name: memberName }) : L('ref_share_text');
         if (navigator.share) {
-          navigator.share({ title: 'Tamil Nadu Vanigargalin Sangamam', text: 'Join Vanigam and get your free membership card!', url: link });
+          navigator.share({ title: L('header_title'), text: shareText, url: link });
         } else {
-          navigator.clipboard.writeText(link).then(() => { botMsg('\u2705 Referral link copied!'); });
+          navigator.clipboard.writeText(link).then(() => { botMsg(L('ref_copied')); });
         }
       };
 
@@ -950,7 +1234,7 @@
           if (res.success) {
             navigator.clipboard.writeText(res.referral_link).then(() => {
               const toast = document.createElement('div');
-              toast.textContent = '✅ Referral link copied!';
+              toast.textContent = L('ref_copied_toast');
               toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1b5e20;color:#fff;padding:10px 20px;border-radius:20px;font-size:0.85rem;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
               document.body.appendChild(toast);
               setTimeout(() => toast.remove(), 2000);
@@ -964,12 +1248,14 @@
         try {
           const res = await api('/api/vanigam/get-referral', { unique_id: user.memberData.unique_id });
           if (res.success) {
+            const memberName = user.memberData.name || '';
+            const shareText = currentLang === 'ta' ? L('ref_share_text_personal', { name: memberName }) : L('ref_share_text');
             if (navigator.share) {
-              navigator.share({ title: 'Tamil Nadu Vanigargalin Sangamam', text: 'Join Vanigam and get your free membership card!', url: res.referral_link });
+              navigator.share({ title: L('header_title'), text: shareText, url: res.referral_link });
             } else {
               navigator.clipboard.writeText(res.referral_link).then(() => {
                 const toast = document.createElement('div');
-                toast.textContent = '✅ Referral link copied!';
+                toast.textContent = L('ref_copied_toast');
                 toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1b5e20;color:#fff;padding:10px 20px;border-radius:20px;font-size:0.85rem;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
                 document.body.appendChild(toast);
                 setTimeout(() => toast.remove(), 2000);
@@ -983,7 +1269,7 @@
         closeSidebar();
         const user = getUser();
         if (!user || !user.memberData || !user.memberData.unique_id) {
-          await botReply('\u274C Please complete registration first.', 600);
+          await botReply(L('org_complete_first'), 600);
           return;
         }
         const rc = user.memberData.referral_count || 0;
@@ -993,13 +1279,15 @@
           if (res.success) refLink = res.referral_link;
         } catch(e) {}
 
-        let h = '<i class="bi bi-briefcase" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>Become an Organizer</strong>';
+        let h = '<i class="bi bi-briefcase" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('org_title') + '</strong>';
         h += '<div style="margin-top:10px;padding:14px;background:#f0f9f1;border-radius:12px;border:1px solid #c8e6c9;">';
+        h += '<p style="font-size:0.85rem;color:#555;margin-bottom:10px;">' + L('org_interest_welcome') + '</p>';
+        h += '<p style="font-size:0.82rem;color:#666;margin-bottom:10px;">' + L('org_min_25') + '</p>';
         if (rc >= 25) {
           h += '<div style="text-align:center;">';
           h += '<i class="bi bi-star-fill" style="font-size:2rem;color:#f9a825;"></i>';
-          h += '<p style="font-weight:700;color:#1b5e20;margin:8px 0 4px;">Congratulations!</p>';
-          h += '<p style="font-size:0.85rem;color:#555;">You have <strong>' + rc + ' referrals</strong> and qualify to become an Organizer. Our team will contact you soon.</p>';
+          h += '<p style="font-weight:700;color:#1b5e20;margin:8px 0 4px;">' + L('org_congrats') + '</p>';
+          h += '<p style="font-size:0.85rem;color:#555;">' + L('org_qualify', { count: rc }) + '</p>';
           h += '</div>';
         } else {
           h += '<div style="text-align:center;">';
@@ -1007,16 +1295,16 @@
           h += '<div style="width:100%;height:8px;background:#e0e0e0;border-radius:4px;margin:10px 0;overflow:hidden;">';
           h += '<div style="width:' + Math.min(100, (rc / 25) * 100) + '%;height:100%;background:linear-gradient(90deg,#4caf50,#2e7d32);border-radius:4px;"></div>';
           h += '</div>';
-          h += '<p style="font-size:0.85rem;color:#555;">You need <strong>' + (25 - rc) + ' more referrals</strong> to become an Organizer.</p>';
-          h += '<p style="font-size:0.8rem;color:#888;margin-top:6px;">Share your referral link to invite more members!</p>';
+          h += '<p style="font-size:0.85rem;color:#555;">' + L('org_need_more', { count: 25 - rc }) + '</p>';
+          h += '<p style="font-size:0.8rem;color:#888;margin-top:6px;">' + L('org_share_hint') + '</p>';
           h += '</div>';
         }
         h += '</div>';
         // Add copy/share referral buttons
         if (refLink) {
           h += '<div style="margin-top:10px;display:flex;gap:8px;">';
-          h += '<button class="action-btn confirm" onclick="copyReferral(\'' + refLink + '\')" style="flex:1;"><i class="bi bi-clipboard"></i> Copy Link</button>';
-          h += '<button class="action-btn confirm" onclick="shareReferral(\'' + refLink + '\')" style="flex:1;"><i class="bi bi-send"></i> Share Link</button>';
+          h += '<button class="action-btn confirm" onclick="copyReferral(\'' + refLink + '\')" style="flex:1;"><i class="bi bi-clipboard"></i> ' + L('ref_copy') + '</button>';
+          h += '<button class="action-btn confirm" onclick="shareReferral(\'' + refLink + '\')" style="flex:1;"><i class="bi bi-send"></i> ' + L('ref_share_link') + '</button>';
           h += '</div>';
         }
         await botReply(h, 800);
@@ -1024,13 +1312,13 @@
 
       window.doMenuHelp = async function () {
         closeSidebar();
-        let h = '<i class="bi bi-question-circle" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>Help & Support</strong>';
+        let h = '<i class="bi bi-question-circle" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('help_title') + '</strong>';
         h += '<div style="margin-top:10px;padding:14px;background:#f0f9f1;border-radius:12px;border:1px solid #c8e6c9;font-size:0.9rem;line-height:1.6;">';
         h += '<p><i class="bi bi-envelope"></i> <strong>Email:</strong> support@vanigan.org</p>';
         h += '<p><i class="bi bi-telephone"></i> <strong>Phone:</strong> +91 9876543210</p>';
         h += '<p><i class="bi bi-globe"></i> <strong>Website:</strong> <a href="https://vanigan.org" target="_blank" style="color:#2e7d32;">vanigan.org</a></p>';
         h += '<hr style="border:none;border-top:1px solid #e0e0e0;margin:10px 0;">';
-        h += '<p style="font-size:0.82rem;color:#888;">For any issues with card generation, referrals, or membership, please contact us via the above channels.</p>';
+        h += '<p style="font-size:0.82rem;color:#888;">' + L('help_contact_hint') + '</p>';
         h += '</div>';
         await botReply(h, 800);
       };
@@ -1042,7 +1330,7 @@
         mobile = ''; epic = ''; voter = null; photoFile = null; photoUrl = '';
         dob = ''; bloodGroup = ''; address = ''; pin = ''; skippedDetails = false; isUpdatingDetails = false;
         chatEl.innerHTML = '';
-        setText('Type a message...');
+        setText(L('ph_type_msg'));
         hideAttach();
         addDateChip();
         addBanner();
@@ -1059,10 +1347,10 @@
         skippedDetails = false;
         state = S.AWAIT_DOB;
         lockInput();
-        let h = '<i class="bi bi-pencil-square"></i> Let\'s complete your membership details!<br><br>';
-        h += '\uD83C\uDF82 Please select your <strong>Date of Birth</strong>:';
+        let h = L('lets_complete') + '<br><br>';
+        h += L('select_dob');
         h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;"></div>';
-        h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> Confirm DOB</button></div>';
+        h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_dob') + '</button></div>';
         await botReply(h, 700);
       };
 
@@ -1075,10 +1363,10 @@
         skippedDetails = false;
         state = S.AWAIT_DOB;
         lockInput();
-        let h = '<i class="bi bi-pencil-square"></i> Let\'s complete your membership details!<br><br>';
-        h += '\uD83C\uDF82 Please select your <strong>Date of Birth</strong>:';
+        let h = L('lets_complete') + '<br><br>';
+        h += L('select_dob');
         h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;"></div>';
-        h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> Confirm DOB</button></div>';
+        h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_dob') + '</button></div>';
         await botReply(h, 700);
       };
 
@@ -1098,7 +1386,7 @@
             unlockInput();
             isUpdatingDetails = false;
             saveUser({ mobile, epic, hasCard: true, memberData: res.member });
-            let h = '<i class="bi bi-check-circle" style="color:#2e7d32;"></i> <strong>Details updated successfully!</strong>';
+            let h = L('details_updated');
             h += buildCardPreviewHtml(res.member);
             await botReply(h, 1200);
             updateSidebarContent();
@@ -1110,11 +1398,11 @@
             setTimeout(() => iframe.remove(), 45000);
           } else {
             unlockInput();
-            await botReply('<i class="bi bi-x-circle"></i> ' + (res.message || 'Failed to save details.'), 600);
+            await botReply('<i class="bi bi-x-circle"></i> ' + (res.message || L('failed_save')), 600);
           }
         } catch(e) {
           hideTyping(); unlockInput();
-          await botReply('<i class="bi bi-x-circle"></i> Something went wrong. Please try again.', 600);
+          await botReply(L('something_wrong'), 600);
         }
       };
 
@@ -1154,16 +1442,16 @@
         div.innerHTML =
           '<div class="bot-avatar-img" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;overflow:hidden;"><img src="/vaniganlogo.png" alt="Vanigam" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>' +
           '<div class="bubble">' +
-          '<div class="banner-text"><strong>Welcome to Tamil Nadu Vanigargalin Sangamam!</strong><br>Your Digital Member ID Card Generator<br><br>' +
-          '\uD83D\uDC4B Hello! Generate your <strong>Tamil Nadu Vanigargalin Sangamam Card</strong> in minutes.<br><br>' +
-          '<em style="color:#667781;font-size:0.85rem;">Tap Start to begin the registration process.</em>' +
+          '<div class="banner-text">' + L('banner_welcome') + '<br><br>' +
+          L('banner_hello') + '<br><br>' +
+          '<em style="color:#667781;font-size:0.85rem;">' + L('banner_tap_start') + '</em>' +
           '<span class="time">' + now() + '</span></div>' +
-          '<div class="banner-action"><button class="btn-reply" id="bannerStartBtn"><i class="bi bi-play-circle-fill me-1"></i> Start</button></div>' +
+          '<div class="banner-action"><button class="btn-reply" id="bannerStartBtn"><i class="bi bi-play-circle-fill me-1"></i> ' + L('btn_start') + '</button></div>' +
           '</div>';
         chatEl.appendChild(div);
         document.getElementById('bannerStartBtn').onclick = function () {
           this.disabled = true;
-          this.innerHTML = '<span class="gen-spinner"></span> Starting...';
+          this.innerHTML = '<span class="gen-spinner"></span> ' + L('btn_starting');
           input.value = 'Hi';
           handleSend();
         };
@@ -1224,9 +1512,9 @@
         try {
           const res = await api('/api/vanigam/send-otp', { mobile });
           hideTyping();
-          if (res.success) { botMsg('\u2705 OTP Resent!'); startResendTimer(); }
-          else { botMsg('\u274C Failed to resend.'); if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Resend OTP'; } }
-        } catch(e) { hideTyping(); botMsg('\u274C Error resending.'); if (btn) { btn.disabled = false; btn.style.opacity = '1'; } }
+          if (res.success) { botMsg(L('otp_resent')); startResendTimer(); }
+          else { botMsg(L('otp_resend_fail')); if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> ' + L('btn_resend_otp'); } }
+        } catch(e) { hideTyping(); botMsg(L('otp_resend_error')); if (btn) { btn.disabled = false; btn.style.opacity = '1'; } }
         unlockInput();
       };
 
@@ -1237,8 +1525,8 @@
         if (rBtn) { rBtn.disabled = true; rBtn.removeAttribute('id'); }
         if (cBtn) { cBtn.disabled = true; cBtn.removeAttribute('id'); }
         state = S.AWAIT_MOBILE; mobile = '';
-        setNumeric('Enter 10-digit mobile number...');
-        botReply('\uD83D\uDCF1 Please enter your <strong>10-digit mobile number</strong> to verify:', 500);
+        setNumeric(L('ph_mobile'));
+        botReply(L('ask_mobile'), 500);
       };
 
       function startResendTimer() {
@@ -1246,26 +1534,31 @@
         const btn = document.getElementById('resendOtpBtn');
         if (!btn) return;
         btn.disabled = true;
-        btn.innerText = 'Resend OTP (' + timeLeft + 's)';
+        btn.innerText = L('btn_resend_otp') + ' (' + timeLeft + 's)';
         if (window.resendTimer) clearInterval(window.resendTimer);
         window.resendTimer = setInterval(() => {
           timeLeft--;
           const cur = document.getElementById('resendOtpBtn');
           if (!cur) { clearInterval(window.resendTimer); return; }
-          if (timeLeft <= 0) { clearInterval(window.resendTimer); cur.disabled = false; cur.style.opacity = '1'; cur.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Resend OTP'; }
-          else { cur.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Resend OTP (' + timeLeft + 's)'; }
+          if (timeLeft <= 0) { clearInterval(window.resendTimer); cur.disabled = false; cur.style.opacity = '1'; cur.innerHTML = '<i class="bi bi-arrow-clockwise"></i> ' + L('btn_resend_otp'); }
+          else { cur.innerHTML = '<i class="bi bi-arrow-clockwise"></i> ' + L('btn_resend_otp') + ' (' + timeLeft + 's)'; }
         }, 1000);
       }
 
       /* ── Init ── */
       async function init() {
+        // Apply stored language on load
+        if (currentLang !== 'en') {
+          document.querySelector('.chat-header .info h4').textContent = L('header_title');
+          document.querySelector('.chat-header .info .status').textContent = L('header_subtitle');
+        }
         addDateChip();
         const saved = getUser();
         if (saved && saved.mobile && saved.hasCard && saved.memberData) {
           mobile = saved.mobile;
           epic = saved.epic || '';
           state = S.DONE;
-          setText('Type a message...');
+          setText(L('ph_type_msg'));
           hideAttach();
 
           // Fetch latest member data from MongoDB to stay in sync
@@ -1281,18 +1574,18 @@
             } catch(e) { /* use cached data if fetch fails */ }
           }
 
-          let h = '\uD83D\uDC4B <strong>Welcome back!</strong> Your Tamil Nadu Vanigargalin Sangamam card is ready.';
+          let h = L('welcome_back_card');
           h += buildCardPreviewHtml(m);
           if (!m.details_completed) {
             h += '<div style="margin-top:12px;padding:12px;background:rgba(255,152,0,0.1);border-radius:10px;border:1px solid rgba(255,152,0,0.3);">';
-            h += '<span style="color:#e65100;font-size:0.9rem;"><i class="bi bi-exclamation-triangle"></i> Some details were skipped.</span>';
+            h += '<span style="color:#e65100;font-size:0.9rem;"><i class="bi bi-exclamation-triangle"></i> ' + L('details_skipped') + '</span>';
             h += '<div style="margin-top:8px;">';
             h += '<button class="action-btn confirm" onclick="doUpdateDetailsFromCard()" style="font-size:0.85rem;padding:8px 16px;">';
-            h += '<i class="bi bi-pencil-square"></i> Update Details Now';
+            h += '<i class="bi bi-pencil-square"></i> ' + L('btn_update_now');
             h += '</button>';
             h += '</div></div>';
           }
-          h += '<div style="margin-top:12px;"><em style="color:#667781;font-size:0.85rem;">Type anything to generate another card, or use the <strong>menu</strong> (<i class="bi bi-list"></i>) for more options.</em></div>';
+          h += '<div style="margin-top:12px;"><em style="color:#667781;font-size:0.85rem;">' + L('type_anything_hint') + '</em></div>';
           botMsg(h);
           updateSidebarContent();
         } else {
@@ -1312,15 +1605,15 @@
         if (state === S.WELCOME) {
           userMsg(txt);
           state = S.AWAIT_MOBILE;
-          setNumeric('Enter 10-digit mobile number...');
-          await botReply('\uD83D\uDCF1 Please enter your <strong>10-digit mobile number</strong> to verify:', 900);
+          setNumeric(L('ph_mobile'));
+          await botReply(L('ask_mobile'), 900);
 
         /* ── AWAIT MOBILE ── */
         } else if (state === S.AWAIT_MOBILE) {
           const m = txt.replace(/\D/g, '');
           if (m.length !== 10 || !/^[6-9]/.test(m)) {
             userMsg(txt);
-            await botReply('\u274C Please enter a valid <strong>10-digit mobile number</strong>.', 600);
+            await botReply(L('invalid_mobile'), 600);
             return;
           }
           userMsg(m);
@@ -1340,9 +1633,9 @@
               mobile = '';
               unlockInput();
               let h = '<div style="padding:14px;background:rgba(244,67,54,0.08);border-radius:12px;border:1px solid rgba(244,67,54,0.3);">';
-              h += '<i class="bi bi-exclamation-octagon" style="color:#d32f2f;font-size:1.2rem;"></i> <strong style="color:#d32f2f;">Don\'t use your same number for Dummy referrals</strong>';
-              h += '<p style="margin-top:6px;font-size:0.85rem;color:#555;">Please use a different mobile number to register.</p>';
-              h += '<button class="action-btn confirm" onclick="doChangeMobile()" style="margin-top:10px;font-size:0.85rem;padding:8px 16px;"><i class="bi bi-telephone"></i> Enter Another Number</button>';
+              h += '<i class="bi bi-exclamation-octagon" style="color:#d32f2f;font-size:1.2rem;"></i> <strong style="color:#d32f2f;">' + L('self_referral_title') + '</strong>';
+              h += '<p style="margin-top:6px;font-size:0.85rem;color:#555;">' + L('self_referral_msg') + '</p>';
+              h += '<button class="action-btn confirm" onclick="doChangeMobile()" style="margin-top:10px;font-size:0.85rem;padding:8px 16px;"><i class="bi bi-telephone"></i> ' + L('btn_enter_another') + '</button>';
               h += '</div>';
               await botReply(h, 800);
               return;
@@ -1353,9 +1646,9 @@
               mobile = '';
               unlockInput();
               let h = '<div style="padding:14px;background:rgba(255,152,0,0.08);border-radius:12px;border:1px solid rgba(255,152,0,0.3);">';
-              h += '<i class="bi bi-person-check" style="color:#e65100;font-size:1.2rem;"></i> <strong style="color:#e65100;">This number is already registered</strong>';
-              h += '<p style="margin-top:6px;font-size:0.85rem;color:#555;">This mobile number already has a membership card.</p>';
-              h += '<button class="action-btn confirm" onclick="doChangeMobile()" style="margin-top:10px;font-size:0.85rem;padding:8px 16px;"><i class="bi bi-telephone"></i> Enter Another Number</button>';
+              h += '<i class="bi bi-person-check" style="color:#e65100;font-size:1.2rem;"></i> <strong style="color:#e65100;">' + L('already_registered_title') + '</strong>';
+              h += '<p style="margin-top:6px;font-size:0.85rem;color:#555;">' + L('already_registered_msg') + '</p>';
+              h += '<button class="action-btn confirm" onclick="doChangeMobile()" style="margin-top:10px;font-size:0.85rem;padding:8px 16px;"><i class="bi bi-telephone"></i> ' + L('btn_enter_another') + '</button>';
               h += '</div>';
               await botReply(h, 800);
               return;
@@ -1364,10 +1657,9 @@
             if (checkRes.success && checkRes.exists && checkRes.has_pin) {
               // Returning user with PIN — skip OTP, ask PIN directly
               state = S.AWAIT_RETURNING_PIN;
-              setNumeric('Enter 4-digit PIN...');
+              setNumeric(L('ph_pin'));
               unlockInput();
-              let welcomeText = '\uD83D\uDC4B Welcome back' + (checkRes.name ? ', <strong>' + checkRes.name + '</strong>' : '') + '!';
-              welcomeText += '<br><br>\uD83D\uDD12 Please enter your <strong>4-digit security PIN</strong> to access your card:';
+              let welcomeText = L('welcome_back_pin', { name: checkRes.name ? ', <strong>' + checkRes.name + '</strong>' : '' });
               await botReply(welcomeText, 800);
             } else {
               // New user or no PIN — send OTP
@@ -1376,28 +1668,28 @@
               hideTyping();
               if (res.success) {
                 state = S.AWAIT_OTP;
-                setNumeric('Enter 6-digit OTP...');
+                setNumeric(L('ph_otp'));
                 unlockInput();
-                let askText = '\uD83D\uDCDE An <strong>OTP</strong> has been sent to <strong>+91 ' + m + '</strong>.<br><br>Please enter the <strong>6-digit OTP</strong>:';
+                let askText = L('otp_sent', { mobile: m });
                 askText += '<div class="action-buttons" style="margin-top:12px;flex-direction:column;">';
-                askText += '<button class="action-btn confirm" id="resendOtpBtn" onclick="doResendOtp()" disabled style="font-size:0.85rem;padding:8px 16px;opacity:0.6;"><i class="bi bi-arrow-clockwise"></i> Resend OTP (30s)</button>';
-                askText += '<button class="action-btn confirm" id="changeMobileBtn" onclick="doChangeMobile()" style="font-size:0.85rem;padding:8px 16px;"><i class="bi bi-telephone"></i> Change Mobile Number</button>';
+                askText += '<button class="action-btn confirm" id="resendOtpBtn" onclick="doResendOtp()" disabled style="font-size:0.85rem;padding:8px 16px;opacity:0.6;"><i class="bi bi-arrow-clockwise"></i> ' + L('btn_resend_otp') + ' (30s)</button>';
+                askText += '<button class="action-btn confirm" id="changeMobileBtn" onclick="doChangeMobile()" style="font-size:0.85rem;padding:8px 16px;"><i class="bi bi-telephone"></i> ' + L('btn_change_mobile') + '</button>';
                 askText += '</div>';
                 await botReply(askText, 800);
                 startResendTimer();
               } else {
                 unlockInput();
-                await botReply('\u274C ' + (res.message || 'Could not send OTP. Please try again.'), 600);
+                await botReply('\u274C ' + (res.message || L('otp_send_fail')), 600);
               }
             }
-          } catch (e) { hideTyping(); unlockInput(); await botReply('\u274C Something went wrong. Please try again.', 600); }
+          } catch (e) { hideTyping(); unlockInput(); await botReply(L('something_wrong'), 600); }
 
         /* ── AWAIT OTP ── */
         } else if (state === S.AWAIT_OTP) {
           const o = txt.replace(/\D/g, '');
           if (o.length !== 6) {
             userMsg(txt);
-            await botReply('\u274C Please enter a valid <strong>6-digit OTP</strong>.', 600);
+            await botReply(L('invalid_otp'), 600);
             return;
           }
           userMsg(o);
@@ -1417,32 +1709,32 @@
               if (res.has_membership && res.member) {
                 // Already has membership
                 state = S.DONE;
-                setText('Type a message...');
+                setText(L('ph_type_msg'));
                 hideAttach();
                 unlockInput();
                 epic = res.member.epic_no || '';
                 saveUser({ mobile, epic, hasCard: true, memberData: res.member });
-                let h = '\u2705 Mobile verified! Your <strong>Tamil Nadu Vanigargalin Sangamam</strong> card was already generated.';
-                h += '<div class="member-summary"><h4>\uD83C\uDFAA Vanigam Member</h4>';
-                h += '<div class="row"><span class="lbl">Name</span><span class="val">' + (res.member.name || '') + '</span></div>';
-                h += '<div class="row"><span class="lbl">Member ID</span><span class="val">' + (res.member.unique_id || '') + '</span></div>';
+                let h = L('mobile_verified_existing');
+                h += '<div class="member-summary"><h4>\uD83C\uDFAA ' + L('sb_vanigam_member') + '</h4>';
+                h += '<div class="row"><span class="lbl">' + L('lbl_name') + '</span><span class="val">' + (res.member.name || '') + '</span></div>';
+                h += '<div class="row"><span class="lbl">' + L('lbl_member_id') + '</span><span class="val">' + (res.member.unique_id || '') + '</span></div>';
                 h += '</div>';
                 if (!res.member.details_completed) {
-                  h += '<br><em style="color:#667781;">Your additional details are incomplete. Type anything to update them.</em>';
+                  h += '<br><em style="color:#667781;">' + L('details_incomplete_hint') + '</em>';
                 }
                 await botReply(h, 1000);
               } else {
                 // New member — ask EPIC
                 state = S.AWAIT_EPIC;
-                setEpicInput('Enter EPIC Number...');
+                setEpicInput(L('ph_epic'));
                 unlockInput();
-                await botReply('\u2705 Mobile number verified!<br><br>Please enter your <strong>EPIC Number</strong> (Voter ID):', 800);
+                await botReply(L('mobile_verified_epic'), 800);
               }
             } else {
               unlockInput();
-              await botReply('\u274C ' + (res.message || 'Invalid OTP. Please try again.'), 600);
+              await botReply('\u274C ' + (res.message || L('invalid_otp_retry')), 600);
             }
-          } catch (e) { hideTyping(); unlockInput(); await botReply('\u274C Verification failed. Please try again.', 600); }
+          } catch (e) { hideTyping(); unlockInput(); await botReply(L('verification_failed'), 600); }
 
         /* ── AWAIT EPIC ── */
         } else if (state === S.AWAIT_EPIC) {
@@ -1457,31 +1749,31 @@
             if (res.success) {
               epic = ep;
               voter = res.voter;
-              let h = '\u2705 <strong>Voter Found!</strong><div class="voter-details-card">';
+              let h = L('voter_found') + '<div class="voter-details-card">';
               const fields = [
-                ['Name', voter.name || ''],
-                ['EPIC No', voter.epic_no || ep],
-                ['Assembly', voter.assembly_name || ''],
-                ['District', voter.district || '']
+                [L('lbl_name'), voter.name || ''],
+                [L('lbl_epic'), voter.epic_no || ep],
+                [L('lbl_assembly'), voter.assembly_name || ''],
+                [L('lbl_district'), voter.district || '']
               ];
               for (const [lbl, v] of fields) {
                 if (!v || !v.trim()) continue;
                 h += '<div class="detail-row"><span class="detail-label">' + lbl + '</span><span class="detail-value">' + v.trim() + '</span></div>';
               }
               h += '</div>';
-              h += '<br>Is this correct?';
+              h += '<br>' + L('is_this_correct');
               h += '<div class="action-buttons">';
-              h += '<button class="action-btn confirm" onclick="confirmVoter()"><i class="bi bi-check-lg"></i> Yes, Correct</button>';
-              h += '<button class="action-btn cancel" onclick="rejectVoter()"><i class="bi bi-x-lg"></i> No, Re-enter</button>';
+              h += '<button class="action-btn confirm" onclick="confirmVoter()"><i class="bi bi-check-lg"></i> ' + L('btn_yes_correct') + '</button>';
+              h += '<button class="action-btn cancel" onclick="rejectVoter()"><i class="bi bi-x-lg"></i> ' + L('btn_no_reenter') + '</button>';
               h += '</div>';
               state = S.VOTER_CONFIRM;
               unlockInput();
               await botReply(h, 1000);
             } else {
               unlockInput();
-              await botReply('\u274C ' + (res.message || 'EPIC Number not found. Please check and try again.'), 600);
+              await botReply('\u274C ' + (res.message || L('epic_not_found')), 600);
             }
-          } catch (e) { hideTyping(); unlockInput(); await botReply('\u274C Could not validate. Please try again.', 600); }
+          } catch (e) { hideTyping(); unlockInput(); await botReply('\u274C ' + L('validate_fail'), 600); }
 
         /* ── VOTER CONFIRM ── */
         } else if (state === S.VOTER_CONFIRM) {
@@ -1492,44 +1784,44 @@
           } else if (lo === 'no' || lo === 'n') {
             userMsg(txt);
             state = S.AWAIT_EPIC;
-            setEpicInput('Enter EPIC Number...');
-            await botReply('Okay! Please enter your <strong>EPIC Number</strong> again:', 500);
+            setEpicInput(L('ph_epic'));
+            await botReply(L('reenter_epic'), 500);
           } else {
             userMsg(txt);
-            await botReply('Please type <strong>Yes</strong> or <strong>No</strong>.', 400);
+            await botReply(L('yes_or_no'), 400);
           }
 
         /* ── AWAIT PHOTO ── */
         } else if (state === S.AWAIT_PHOTO) {
           // User typed instead of uploading photo
           userMsg(txt);
-          await botReply('\uD83D\uDCF7 Please use the buttons below to <strong>upload your photo</strong>.', 500);
+          await botReply(L('please_upload_photo'), 500);
 
         /* ── AWAIT PIN ── */
         } else if (state === S.AWAIT_PIN) {
           const p = txt.replace(/\D/g, '');
           if (p.length !== 4) {
             userMsg(txt);
-            await botReply('Please enter exactly <strong>4 digits</strong> for your PIN.', 500);
+            await botReply(L('pin_4digits'), 500);
             return;
           }
           userMsg('\u2022\u2022\u2022\u2022');
           pin = p;
           state = S.AWAIT_PIN_CONFIRM;
-          setNumeric('Re-enter PIN to confirm...');
-          await botReply('<i class="bi bi-shield-check"></i> Please <strong>re-enter your PIN</strong> to confirm:', 700);
+          setNumeric(L('ph_reenter_pin'));
+          await botReply(L('confirm_pin'), 700);
 
         } else if (state === S.AWAIT_PIN_CONFIRM) {
           const p = txt.replace(/\D/g, '');
           userMsg('\u2022\u2022\u2022\u2022');
           if (p !== pin) {
             state = S.AWAIT_PIN;
-            setNumeric('Enter 4-digit PIN...');
+            setNumeric(L('ph_pin'));
             pin = '';
-            await botReply('<i class="bi bi-x-circle"></i> PINs do not match. Please set your <strong>4-digit PIN</strong> again:', 600);
+            await botReply(L('pin_mismatch'), 600);
             return;
           }
-          await botReply('<i class="bi bi-check-circle"></i> PIN set successfully!', 500);
+          await botReply(L('pin_set_success'), 500);
           await askAdditionalDetails();
 
         /* ── AWAIT RETURNING PIN ── */
@@ -1537,7 +1829,7 @@
           const p = txt.replace(/\D/g, '');
           if (p.length !== 4) {
             userMsg(txt);
-            await botReply('Please enter your <strong>4-digit PIN</strong>.', 500);
+            await botReply(L('enter_4digit_pin'), 500);
             return;
           }
           userMsg('\u2022\u2022\u2022\u2022');
@@ -1551,25 +1843,25 @@
               const m = res.member;
               epic = m.epic_no || '';
               saveUser({ mobile, epic, hasCard: true, memberData: m });
-              let h = '\uD83D\uDC4B <strong>Welcome back!</strong> Your Tamil Nadu Vanigargalin Sangamam card is ready.';
+              let h = L('welcome_back_card');
               h += buildCardPreviewHtml(m);
               if (!m.details_completed) {
                 h += '<div style="margin-top:12px;padding:12px;background:rgba(255,152,0,0.1);border-radius:10px;border:1px solid rgba(255,152,0,0.3);">';
-                h += '<span style="color:#e65100;font-size:0.9rem;"><i class="bi bi-exclamation-triangle"></i> Some details were skipped.</span>';
+                h += '<span style="color:#e65100;font-size:0.9rem;"><i class="bi bi-exclamation-triangle"></i> ' + L('details_skipped') + '</span>';
                 h += '<div style="margin-top:8px;">';
                 h += '<button class="action-btn confirm" onclick="doUpdateDetailsFromCard()" style="font-size:0.85rem;padding:8px 16px;">';
-                h += '<i class="bi bi-pencil-square"></i> Update Details Now';
+                h += '<i class="bi bi-pencil-square"></i> ' + L('btn_update_now');
                 h += '</button>';
                 h += '</div></div>';
               }
               await botReply(h, 1200);
             } else {
               unlockInput();
-              await botReply('<i class="bi bi-x-circle"></i> ' + (res.message || 'Invalid PIN.') + ' Please try again.', 600);
+              await botReply('<i class="bi bi-x-circle"></i> ' + (res.message || L('invalid_pin')) + ' ' + L('verification_failed').replace('\u274C ', ''), 600);
             }
           } catch(e) {
             hideTyping(); unlockInput();
-            await botReply('Verification failed. Please try again.', 600);
+            await botReply(L('verification_failed'), 600);
           }
 
         /* ── ASK ADDITIONAL ── */
@@ -1579,28 +1871,28 @@
           const lo = txt.toLowerCase();
           if (lo === 'add' || lo === 'yes') { await startAdditionalDetails(); }
           else if (lo === 'skip') { await skipAdditionalDetails(); }
-          else { await botReply('Please tap <strong>Add Details</strong> or <strong>Skip</strong>.', 400); }
+          else { await botReply(L('tap_add_or_skip'), 400); }
 
         /* ── AWAIT DOB ── */
         } else if (state === S.AWAIT_DOB) {
           // Handled by calendar picker button (submitDob)
           if (!txt) return;
           userMsg(txt);
-          await botReply('Please use the <strong>calendar picker</strong> above to select your date of birth.', 400);
+          await botReply(L('use_calendar'), 400);
 
         /* ── AWAIT BLOOD ── */
         } else if (state === S.AWAIT_BLOOD) {
           // Handled by blood group buttons (submitBloodGroup)
           if (!txt) return;
           userMsg(txt);
-          await botReply('Please tap one of the <strong>blood group buttons</strong> above to select.', 400);
+          await botReply(L('use_blood_buttons'), 400);
 
         /* ── AWAIT ADDRESS ── */
         } else if (state === S.AWAIT_ADDRESS) {
           // Handled by address textarea (submitAddress)
           if (!txt) return;
           userMsg(txt);
-          await botReply('Please use the <strong>address box</strong> above and tap <strong>Confirm Address</strong>.', 400);
+          await botReply(L('use_address_box'), 400);
 
         /* ── CONFIRM ALL ── */
         } else if (state === S.CONFIRM_ALL) {
@@ -1611,47 +1903,47 @@
           } else if (lo === 'no' || lo === 'cancel' || lo === 'n') {
             userMsg(txt);
             state = S.AWAIT_EPIC;
-            setEpicInput('Enter EPIC Number...');
+            setEpicInput(L('ph_epic'));
             hideAttach();
             photoFile = null; photoUrl = ''; dob = ''; bloodGroup = ''; address = ''; skippedDetails = false;
-            await botReply('Cancelled. Please enter your <strong>EPIC Number</strong> to start over:', 700);
+            await botReply(L('cancelled_start_over'), 700);
           } else {
             userMsg(txt);
-            await botReply('Please type <strong>Yes</strong> to confirm or <strong>No</strong> to cancel.', 500);
+            await botReply(L('yes_to_confirm'), 500);
           }
 
         /* ── DONE ── */
         } else if (state === S.DONE) {
           userMsg(txt);
           state = S.AWAIT_MOBILE;
-          setNumeric('Enter 10-digit mobile number...');
+          setNumeric(L('ph_mobile'));
           hideAttach();
           photoFile = null; photoUrl = ''; dob = ''; bloodGroup = ''; address = ''; skippedDetails = false;
-          await botReply('\uD83D\uDC4B Ready for another card?<br><br>\uD83D\uDCF1 Please enter your <strong>10-digit mobile number</strong>:', 800);
+          await botReply(L('ready_another'), 800);
         }
       }
 
       /* ── Confirm voter details ── */
       window.confirmVoter = async function () {
-        userMsg('<i class="bi bi-check-lg"></i> Yes, Correct');
+        userMsg('<i class="bi bi-check-lg"></i> ' + L('btn_yes_correct'));
         await startPhotoUpload();
       };
       window.rejectVoter = async function () {
-        userMsg('<i class="bi bi-x-lg"></i> No, Re-enter');
+        userMsg('<i class="bi bi-x-lg"></i> ' + L('btn_no_reenter'));
         state = S.AWAIT_EPIC;
-        setEpicInput('Enter EPIC Number...');
-        await botReply('Okay! Please enter your <strong>EPIC Number</strong> again:', 500);
+        setEpicInput(L('ph_epic'));
+        await botReply(L('reenter_epic'), 500);
       };
 
       /* ── Start Photo Upload step ── */
       async function startPhotoUpload() {
         state = S.AWAIT_PHOTO;
-        setText('Click the upload button below...');
+        setText(L('ph_upload'));
         showAttach();
-        let h = '\uD83D\uDCF7 Now please <strong>upload your photo</strong> using the buttons below.';
+        let h = L('upload_photo');
         h += '<div class="action-buttons" style="margin-top:10px;">';
-        h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> Upload Photo</button>';
-        h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> Camera</button>';
+        h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_upload_photo') + '</button>';
+        h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
         h += '</div>';
         await botReply(h, 800);
       }
@@ -1659,21 +1951,21 @@
       /* ── PIN Setup ── */
       async function askPinSetup() {
         state = S.AWAIT_PIN;
-        setNumeric('Enter 4-digit PIN...');
-        let h = '<i class="bi bi-shield-lock"></i> Please set a <strong>4-digit PIN</strong> for your membership.';
-        h += '<br><br><em style="color:#667781;font-size:0.85rem;">This PIN will be used to verify your identity when accessing your card from another device.</em>';
+        setNumeric(L('ph_pin'));
+        let h = L('set_pin');
+        h += '<br><br><em style="color:#667781;font-size:0.85rem;">' + L('pin_hint') + '</em>';
         await botReply(h, 800);
       }
 
       /* ── Ask for Additional Details ── */
       async function askAdditionalDetails() {
         state = S.ASK_ADDITIONAL;
-        setText('Type "add" or "skip"...');
-        let h = '\uD83D\uDCDD Would you like to add <strong>additional details</strong>?<br><br>';
-        h += '<em style="color:#667781;font-size:0.85rem;">Adding details (DOB, Blood Group, Address) will complete your membership card. You can skip and fill them later via QR code.</em>';
+        setText(L('ph_add_or_skip'));
+        let h = L('ask_additional') + '<br><br>';
+        h += '<em style="color:#667781;font-size:0.85rem;">' + L('additional_hint') + '</em>';
         h += '<div class="action-buttons" style="margin-top:12px;">';
-        h += '<button class="action-btn confirm" onclick="startAdditionalDetails()"><i class="bi bi-plus-circle"></i> Add Details</button>';
-        h += '<button class="action-btn skip" onclick="skipAdditionalDetails()"><i class="bi bi-skip-forward"></i> Skip</button>';
+        h += '<button class="action-btn confirm" onclick="startAdditionalDetails()"><i class="bi bi-plus-circle"></i> ' + L('btn_add_details') + '</button>';
+        h += '<button class="action-btn skip" onclick="skipAdditionalDetails()"><i class="bi bi-skip-forward"></i> ' + L('btn_skip') + '</button>';
         h += '</div>';
         await botReply(h, 900);
       }
@@ -1682,9 +1974,9 @@
         state = S.AWAIT_DOB;
         skippedDetails = false;
         lockInput();
-        let h = '\uD83C\uDF82 Please select your <strong>Date of Birth</strong>:';
+        let h = L('select_dob');
         h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;"></div>';
-        h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> Confirm DOB</button></div>';
+        h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_dob') + '</button></div>';
         await botReply(h, 700);
       };
 
@@ -1692,7 +1984,7 @@
       window.submitDob = async function () {
         const picker = document.getElementById('dobPicker');
         if (!picker || !picker.value) {
-          await botReply('\u274C Please select a date.', 400);
+          await botReply(L('select_date'), 400);
           return;
         }
         const parts = picker.value.split('-');
@@ -1709,7 +2001,7 @@
       async function showBloodGroupPicker() {
         state = S.AWAIT_BLOOD;
         const groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-        let h = '\uD83E\uDE78 Please select your <strong>Blood Group</strong>:';
+        let h = L('select_blood');
         h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:10px;">';
         groups.forEach(g => {
           h += '<button class="action-btn confirm" onclick="submitBloodGroup(\'' + g + '\')" style="padding:10px 0;font-size:0.95rem;border-radius:10px;">' + g + '</button>';
@@ -1730,12 +2022,12 @@
       /* ── Address Input with 70 char limit ── */
       async function showAddressInput() {
         state = S.AWAIT_ADDRESS;
-        let h = '\uD83C\uDFE0 Please enter your <strong>full address</strong> <span style="color:#888;font-size:0.8rem;">(max 70 characters)</span>:';
+        let h = L('enter_address');
         h += '<div style="margin-top:10px;position:relative;">';
-        h += '<textarea id="addressInput" maxlength="70" rows="3" placeholder="Enter your address..." style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:0.95rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;resize:none;" oninput="updateAddrCount()"></textarea>';
+        h += '<textarea id="addressInput" maxlength="70" rows="3" placeholder="' + L('ph_address') + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:0.95rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;resize:none;" oninput="updateAddrCount()"></textarea>';
         h += '<div id="addrCount" style="text-align:right;font-size:0.75rem;color:#888;margin-top:2px;">0 / 70</div>';
         h += '</div>';
-        h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitAddress()" style="width:100%;"><i class="bi bi-check-lg"></i> Confirm Address</button></div>';
+        h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitAddress()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_address') + '</button></div>';
         await botReply(h, 700);
         setTimeout(() => { const ta = document.getElementById('addressInput'); if (ta) ta.focus(); }, 900);
       }
@@ -1755,7 +2047,7 @@
       window.submitAddress = async function () {
         const ta = document.getElementById('addressInput');
         if (!ta || !ta.value.trim()) {
-          await botReply('\u274C Please enter your address.', 400);
+          await botReply(L('enter_address_err'), 400);
           return;
         }
         address = ta.value.trim().substring(0, 70);
@@ -1767,7 +2059,7 @@
       };
 
       window.skipAdditionalDetails = async function () {
-        userMsg('<i class="bi bi-skip-forward"></i> Skip');
+        userMsg('<i class="bi bi-skip-forward"></i> ' + L('btn_skip'));
         skippedDetails = true;
         dob = ''; bloodGroup = ''; address = '';
         await showConfirmation();
@@ -1776,63 +2068,63 @@
       /* ── Show Confirmation ── */
       async function showConfirmation() {
         state = S.CONFIRM_ALL;
-        setText('Type "yes" to confirm...');
+        setText(L('ph_confirm'));
         hideAttach();
 
         if (isUpdatingDetails) {
           // Update details mode
-          let h = '\uD83D\uDCCB <strong>Please confirm your updated details:</strong>';
-          h += '<div class="member-summary"><h4>\uD83C\uDFAA Update Details</h4>';
-          if (dob) h += '<div class="row"><span class="lbl">DOB</span><span class="val">' + dob + '</span></div>';
-          if (bloodGroup) h += '<div class="row"><span class="lbl">Blood Group</span><span class="val">' + bloodGroup + '</span></div>';
-          if (address) h += '<div class="row"><span class="lbl">Address</span><span class="val">' + address + '</span></div>';
+          let h = L('confirm_updated');
+          h += '<div class="member-summary"><h4>\uD83C\uDFAA ' + L('lbl_update_details') + '</h4>';
+          if (dob) h += '<div class="row"><span class="lbl">' + L('lbl_dob') + '</span><span class="val">' + dob + '</span></div>';
+          if (bloodGroup) h += '<div class="row"><span class="lbl">' + L('lbl_blood') + '</span><span class="val">' + bloodGroup + '</span></div>';
+          if (address) h += '<div class="row"><span class="lbl">' + L('lbl_address') + '</span><span class="val">' + address + '</span></div>';
           h += '</div>';
-          h += '<br>Save these details?';
+          h += '<br>' + L('save_these');
           h += '<div class="action-buttons">';
-          h += '<button class="action-btn confirm" onclick="doSaveUpdatedDetails()"><i class="bi bi-check-lg"></i> Save Details</button>';
-          h += '<button class="action-btn cancel" onclick="doCancelUpdate()"><i class="bi bi-x-lg"></i> Cancel</button>';
+          h += '<button class="action-btn confirm" onclick="doSaveUpdatedDetails()"><i class="bi bi-check-lg"></i> ' + L('btn_save_details') + '</button>';
+          h += '<button class="action-btn cancel" onclick="doCancelUpdate()"><i class="bi bi-x-lg"></i> ' + L('btn_cancel') + '</button>';
           h += '</div>';
           await botReply(h, 1000);
         } else {
           // Normal card generation mode
-          let h = '\uD83D\uDCCB <strong>Please confirm your details:</strong>';
-          h += '<div class="member-summary"><h4>\uD83C\uDFAA Tamil Nadu Vanigargalin Sangamam</h4>';
-          h += '<div class="row"><span class="lbl">Name</span><span class="val">' + (voter ? voter.name : '') + '</span></div>';
-          h += '<div class="row"><span class="lbl">EPIC No</span><span class="val">' + epic + '</span></div>';
-          h += '<div class="row"><span class="lbl">Assembly</span><span class="val">' + (voter ? (voter.assembly_name || '') : '') + '</span></div>';
-          h += '<div class="row"><span class="lbl">District</span><span class="val">' + (voter ? (voter.district || '') : '') + '</span></div>';
-          h += '<div class="row"><span class="lbl">Mobile</span><span class="val">+91 ' + mobile + '</span></div>';
-          if (dob) h += '<div class="row"><span class="lbl">DOB</span><span class="val">' + dob + '</span></div>';
-          if (bloodGroup) h += '<div class="row"><span class="lbl">Blood Group</span><span class="val">' + bloodGroup + '</span></div>';
-          if (address) h += '<div class="row"><span class="lbl">Address</span><span class="val">' + address + '</span></div>';
-          if (skippedDetails) h += '<div class="row"><span class="lbl">Status</span><span class="val" style="color:#ff9800;">Details Pending</span></div>';
+          let h = L('confirm_details');
+          h += '<div class="member-summary"><h4>\uD83C\uDFAA ' + L('header_title') + '</h4>';
+          h += '<div class="row"><span class="lbl">' + L('lbl_name') + '</span><span class="val">' + (voter ? voter.name : '') + '</span></div>';
+          h += '<div class="row"><span class="lbl">' + L('lbl_epic') + '</span><span class="val">' + epic + '</span></div>';
+          h += '<div class="row"><span class="lbl">' + L('lbl_assembly') + '</span><span class="val">' + (voter ? (voter.assembly_name || '') : '') + '</span></div>';
+          h += '<div class="row"><span class="lbl">' + L('lbl_district') + '</span><span class="val">' + (voter ? (voter.district || '') : '') + '</span></div>';
+          h += '<div class="row"><span class="lbl">' + L('lbl_mobile') + '</span><span class="val">+91 ' + mobile + '</span></div>';
+          if (dob) h += '<div class="row"><span class="lbl">' + L('lbl_dob') + '</span><span class="val">' + dob + '</span></div>';
+          if (bloodGroup) h += '<div class="row"><span class="lbl">' + L('lbl_blood') + '</span><span class="val">' + bloodGroup + '</span></div>';
+          if (address) h += '<div class="row"><span class="lbl">' + L('lbl_address') + '</span><span class="val">' + address + '</span></div>';
+          if (skippedDetails) h += '<div class="row"><span class="lbl">' + L('lbl_status') + '</span><span class="val" style="color:#ff9800;">' + L('details_pending') + '</span></div>';
           h += '</div>';
-          h += '<br>Ready to generate your <strong>Tamil Nadu Vanigargalin Sangamam Card</strong>?';
+          h += '<br>' + L('ready_generate');
           h += '<div class="action-buttons">';
-          h += '<button class="action-btn confirm" onclick="doConfirmGenerate()"><i class="bi bi-check-lg"></i> Confirm & Generate</button>';
-          h += '<button class="action-btn cancel" onclick="doCancelAll()"><i class="bi bi-x-lg"></i> Cancel</button>';
+          h += '<button class="action-btn confirm" onclick="doConfirmGenerate()"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_generate') + '</button>';
+          h += '<button class="action-btn cancel" onclick="doCancelAll()"><i class="bi bi-x-lg"></i> ' + L('btn_cancel') + '</button>';
           h += '</div>';
           await botReply(h, 1000);
         }
       }
 
       window.doConfirmGenerate = async function () {
-        userMsg('\u2705 Confirm & Generate');
+        userMsg('\u2705 ' + L('btn_confirm_generate'));
         await doGenerateCard();
       };
       window.doCancelUpdate = async function () {
-        userMsg('\u274C Cancel');
+        userMsg('\u274C ' + L('btn_cancel'));
         state = S.DONE;
         isUpdatingDetails = false;
-        await botReply('Update cancelled. You can update your details anytime from the sidebar menu.', 600);
+        await botReply(L('update_cancelled'), 600);
       };
       window.doCancelAll = async function () {
-        userMsg('\u274C Cancel');
+        userMsg('\u274C ' + L('btn_cancel'));
         state = S.AWAIT_EPIC;
-        setEpicInput('Enter EPIC Number...');
+        setEpicInput(L('ph_epic'));
         hideAttach();
         photoFile = null; photoUrl = ''; dob = ''; bloodGroup = ''; address = ''; skippedDetails = false;
-        await botReply('Cancelled. Please enter your <strong>EPIC Number</strong> to start over:', 700);
+        await botReply(L('cancelled_start_over'), 700);
       };
 
       /* ── Reusable Card Preview HTML ── */
@@ -1875,9 +2167,9 @@
         h += '</div>';
         // Action buttons
         h += '<div class="card-actions">';
-        h += '<button class="card-action-btn primary" onclick="window.open(\'/card-view\',\'_blank\')"><i class="bi bi-eye"></i> View Full Card</button>';
-        h += '<button class="card-action-btn primary" onclick="window.open(\'/card-view\',\'_blank\')"><i class="bi bi-download"></i> Download</button>';
-        h += '<button class="card-action-btn secondary" onclick="doMenuRefer()"><i class="bi bi-share"></i> Share</button>';
+        h += '<button class="card-action-btn primary" onclick="window.open(\'/card-view\',\'_blank\')"><i class="bi bi-eye"></i> ' + L('btn_view_card') + '</button>';
+        h += '<button class="card-action-btn primary" onclick="window.open(\'/card-view\',\'_blank\')"><i class="bi bi-download"></i> ' + L('btn_download') + '</button>';
+        h += '<button class="card-action-btn secondary" onclick="doMenuRefer()"><i class="bi bi-share"></i> ' + L('btn_share') + '</button>';
         h += '</div>';
         h += '</div>';
         return h;
@@ -1891,7 +2183,7 @@
         try {
           // Step 1: Upload photo if we have a file but no URL yet
           if (photoFile && !photoUrl) {
-            await botReply('\u2B06\uFE0F Uploading your photo...', 400);
+            await botReply(L('uploading_photo'), 400);
             showTyping();
             const fd = new FormData();
             fd.append('photo', photoFile);
@@ -1902,10 +2194,10 @@
               state = S.AWAIT_PHOTO;
               showAttach();
               unlockInput();
-              let h = '\u274C Photo upload failed. Please try again.';
+              let h = L('photo_upload_failed');
               h += '<div class="action-buttons" style="margin-top:10px;">';
-              h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> Re-upload Photo</button>';
-              h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> Camera</button>';
+              h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_reupload') + '</button>';
+              h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
               h += '</div>';
               await botReply(h, 600);
               return;
@@ -1914,7 +2206,7 @@
           }
 
           // Step 2: Generate card
-          await botReply('\u2699\uFE0F Generating your <strong>Tamil Nadu Vanigargalin Sangamam Card</strong>... Please wait.', 400);
+          await botReply(L('generating_card'), 400);
           showTyping();
 
           const cardData = {
@@ -1937,7 +2229,7 @@
 
           if (res.success && res.member) {
             state = S.DONE;
-            setText('Type a message...');
+            setText(L('ph_type_msg'));
             hideAttach();
             unlockInput();
 
@@ -1945,15 +2237,15 @@
 
             const m = res.member;
 
-            let h = '\uD83C\uDF89 <strong>Your Tamil Nadu Vanigargalin Sangamam Card has been generated!</strong>';
+            let h = L('card_generated');
             h += buildCardPreviewHtml(m);
 
             if (skippedDetails) {
               h += '<div style="margin-top:12px;padding:12px;background:rgba(255,152,0,0.1);border-radius:10px;border:1px solid rgba(255,152,0,0.3);">';
-              h += '<span style="color:#e65100;font-size:0.9rem;"><i class="bi bi-exclamation-triangle"></i> Some details were skipped.</span>';
+              h += '<span style="color:#e65100;font-size:0.9rem;"><i class="bi bi-exclamation-triangle"></i> ' + L('details_skipped') + '</span>';
               h += '<div style="margin-top:8px;">';
               h += '<button class="action-btn confirm" onclick="doUpdateDetailsFromCard()" style="font-size:0.85rem;padding:8px 16px;">';
-              h += '<i class="bi bi-pencil-square"></i> Update Details Now';
+              h += '<i class="bi bi-pencil-square"></i> ' + L('btn_update_now');
               h += '</button>';
               h += '</div></div>';
             }
@@ -1979,13 +2271,13 @@
           } else {
             state = S.CONFIRM_ALL;
             unlockInput();
-            await botReply('\u274C ' + (res.message || 'Card generation failed. Please try again.'), 700);
+            await botReply('\u274C ' + (res.message || L('card_gen_fail')), 700);
           }
         } catch (e) {
           hideTyping();
           state = S.CONFIRM_ALL;
           unlockInput();
-          await botReply('\u274C Something went wrong. Please try again.', 600);
+          await botReply(L('something_wrong'), 600);
         }
       }
 
@@ -1999,10 +2291,10 @@
       function handlePhotoFile(file) {
         if (!file) return;
         if (file.size > MAX_PHOTO_SIZE) {
-          let h = '\u274C File size exceeds <strong>5 MB</strong>. Please upload a smaller photo.';
+          let h = L('photo_too_large');
           h += '<div class="action-buttons" style="margin-top:10px;">';
-          h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> Upload Photo</button>';
-          h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> Camera</button>';
+          h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_upload_photo') + '</button>';
+          h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
           h += '</div>';
           botReply(h, 600);
           return;
@@ -2010,7 +2302,7 @@
         photoFile = file;
         const reader = new FileReader();
         reader.onload = async (ev) => {
-          userMsg('<img src="' + ev.target.result + '" class="photo-thumb" alt="Photo"><br>Photo uploaded');
+          userMsg('<img src="' + ev.target.result + '" class="photo-thumb" alt="Photo"><br>' + L('photo_uploaded'));
           hideAttach();
           // Now ask to set PIN
           await askPinSetup();
