@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
   <title>Tamil Nadu Vanigargalin Sangamam — Digital Member ID Card Generator</title>
@@ -901,6 +901,18 @@
         },
         wings_general: { en: 'General Wing', ta: 'பொது பிரிவு' },
 
+        // Visit Website & Download App
+        sb_website: { en: 'Visit Website', ta: 'இணையதளத்தைப் பார்க்க' },
+        sb_website_desc: { en: 'Go to vanigan.org', ta: 'vanigan.org க்கு செல்க' },
+        website_title: { en: 'Visit Our Website', ta: 'எங்கள் இணையதளத்தைப் பார்க்கவும்' },
+        website_msg: { en: 'Visit the official Tamil Nadu Vanigargalin Sangamam website for more information, updates, and resources.', ta: 'மேலும் தகவல்கள், புதுப்பிப்புகள் மற்றும் ஆதாரங்களுக்கு தமிழ்நாடு வணிகர்களின் சங்கமத்தின் அதிகாரப்பூர்வ இணையதளத்தைப் பார்க்கவும்.' },
+        website_btn: { en: 'Visit vanigan.org', ta: 'vanigan.org பார்க்க' },
+        sb_download: { en: 'Download App', ta: 'ஆப் பதிவிறக்கம்' },
+        sb_download_desc: { en: 'Get the Android app', ta: 'ஆண்ட்ராய்டு ஆப் பதிவிறக்கம்' },
+        download_title: { en: 'Download Our App', ta: 'எங்கள் ஆப்பை பதிவிறக்கவும்' },
+        download_msg: { en: 'Download the official Vanigan app from Google Play Store for the best experience on your Android device.', ta: 'உங்கள் ஆண்ட்ராய்டு சாதனத்தில் சிறந்த அனுபவத்திற்கு Google Play Store இல் இருந்து அதிகாரப்பூர்வ வணிகம் ஆப்பை பதிவிறக்கவும்.' },
+        download_btn: { en: 'Download on Play Store', ta: 'Play Store இல் பதிவிறக்கம்' },
+
         // Language toggle
         lang_label: { en: 'Language', ta: 'மொழி' },
         lang_en: { en: 'English', ta: 'English' },
@@ -1118,6 +1130,8 @@
         html += '<div class="sb-menu-item" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i><div class="sb-menu-text"><h5>' + L('sb_organizer') + '</h5><p>' + L('sb_organizer_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         html += '<div class="sb-menu-item" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i><div class="sb-menu-text"><h5>' + L('sb_wings') + '</h5><p>' + L('sb_wings_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         html += '<div class="sb-menu-item" onclick="doMenuHelp()"><i class="bi bi-question-circle"></i><div class="sb-menu-text"><h5>' + L('sb_help') + '</h5><p>' + L('sb_help_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
+        html += '<div class="sb-menu-item" onclick="doMenuWebsite()"><i class="bi bi-globe2"></i><div class="sb-menu-text"><h5>' + L('sb_website') + '</h5><p>' + L('sb_website_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
+        html += '<div class="sb-menu-item" onclick="doMenuDownload()"><i class="bi bi-google-play"></i><div class="sb-menu-text"><h5>' + L('sb_download') + '</h5><p>' + L('sb_download_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         // Language Toggle
         html += '<div class="sb-menu-item" style="cursor:default;"><i class="bi bi-translate"></i><div class="sb-menu-text"><h5>' + L('lang_label') + '</h5><p>English / தமிழ்</p></div>';
         html += '<div style="position:relative;width:48px;height:26px;border-radius:13px;cursor:pointer;transition:background 0.3s;background:' + (currentLang === 'ta' ? '#2e7d32' : '#ccc') + ';flex-shrink:0;" onclick="toggleLang()">';
@@ -1352,7 +1366,7 @@
         h += '<div style="margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid #c8e6c9;">';
         // General Wing header
         h += '<div style="background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;padding:12px 14px;font-weight:700;font-size:0.95rem;text-align:center;">';
-        h += '<i class="bi bi-star-fill" style="color:#fdd835;"></i> ' + L('wings_general');
+        h += L('wings_general');
         h += '</div>';
         // Wings table
         h += '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">';
@@ -1380,6 +1394,28 @@
         await botReply(h, 800);
       };
 
+      window.doMenuWebsite = async function () {
+        closeSidebar();
+        let h = '<i class="bi bi-globe2" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('website_title') + '</strong>';
+        h += '<div style="margin-top:10px;padding:14px;background:#f0f9f1;border-radius:12px;border:1px solid #c8e6c9;">';
+        h += '<p style="font-size:0.9rem;color:#555;margin-bottom:12px;">' + L('website_msg') + '</p>';
+        h += '<a href="https://vanigan.org/" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700;font-size:0.95rem;box-shadow:0 2px 8px rgba(46,125,50,0.3);">';
+        h += '<i class="bi bi-globe2" style="font-size:1.1rem;"></i> ' + L('website_btn');
+        h += '</a></div>';
+        await botReply(h, 800);
+      };
+
+      window.doMenuDownload = async function () {
+        closeSidebar();
+        let h = '<i class="bi bi-phone" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('download_title') + '</strong>';
+        h += '<div style="margin-top:10px;padding:14px;background:#f0f9f1;border-radius:12px;border:1px solid #c8e6c9;">';
+        h += '<p style="font-size:0.9rem;color:#555;margin-bottom:12px;">' + L('download_msg') + '</p>';
+        h += '<a href="https://play.google.com/store/apps/details?id=io.vanigan.ai" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1a1a1a,#333);color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700;font-size:0.95rem;box-shadow:0 2px 8px rgba(0,0,0,0.3);">';
+        h += '<i class="bi bi-google-play" style="font-size:1.1rem;"></i> ' + L('download_btn');
+        h += '</a></div>';
+        await botReply(h, 800);
+      };
+
       window.doMenuLogout = function () {
         closeSidebar();
         clearUser();
@@ -1387,6 +1423,9 @@
         mobile = ''; epic = ''; voter = null; photoFile = null; photoUrl = '';
         dob = ''; bloodGroup = ''; address = ''; pin = ''; skippedDetails = false; isUpdatingDetails = false;
         chatEl.innerHTML = '';
+        // Reset sidebar avatar back to default icon
+        const sbAvatar = document.querySelector('.sidebar-header .sb-avatar');
+        if (sbAvatar) sbAvatar.innerHTML = '<i class="bi bi-person-fill"></i>';
         setText(L('ph_type_msg'));
         hideAttach();
         addDateChip();
