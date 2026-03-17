@@ -892,6 +892,15 @@
         something_wrong: { en: '\u274C Something went wrong. Please try again.', ta: '\u274C ஏதோ பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.' },
         failed_save: { en: 'Failed to save details.', ta: 'விவரங்களைச் சேமிக்கத் தோல்வி.' },
 
+        // Wings List
+        sb_wings: { en: 'Wings List', ta: 'பிரிவுகள் பட்டியல்' },
+        sb_wings_desc: { en: 'View all wings of the Sangamam', ta: 'சங்கமத்தின் அனைத்து பிரிவுகளையும் காண்க' },
+        wings_title: {
+          en: 'Tamil Nadu Vanigargalin Sangamam (WINGS LIST)',
+          ta: 'தமிழ்நாடு வணிகர்களின் சங்கமத்தின் பிரிவுகள்(WINGS LIST)'
+        },
+        wings_general: { en: 'General Wing', ta: 'பொது பிரிவு' },
+
         // Language toggle
         lang_label: { en: 'Language', ta: 'மொழி' },
         lang_en: { en: 'English', ta: 'English' },
@@ -928,20 +937,10 @@
         // Update static header text
         document.querySelector('.chat-header .info h4').textContent = L('header_title');
         document.querySelector('.chat-header .info .status').textContent = L('header_subtitle');
-        // Update input placeholder based on current state
-        const inp = document.getElementById('messageInput');
-        if (inp && !inp.disabled) {
-          if (state === S.WELCOME || state === S.DONE) inp.placeholder = L('ph_type_msg');
-          else if (state === S.AWAIT_MOBILE) inp.placeholder = L('ph_mobile');
-          else if (state === S.AWAIT_OTP) inp.placeholder = L('ph_otp');
-          else if (state === S.AWAIT_EPIC) inp.placeholder = L('ph_epic');
-          else if (state === S.AWAIT_PIN || state === S.AWAIT_RETURNING_PIN) inp.placeholder = L('ph_pin');
-          else if (state === S.AWAIT_PIN_CONFIRM) inp.placeholder = L('ph_reenter_pin');
-          else if (state === S.AWAIT_PHOTO) inp.placeholder = L('ph_upload');
-          else if (state === S.ASK_ADDITIONAL) inp.placeholder = L('ph_add_or_skip');
-          else if (state === S.CONFIRM_ALL) inp.placeholder = L('ph_confirm');
-        }
-        // Refresh sidebar if open
+        // Clear chat and re-render from current state
+        chatEl.innerHTML = '';
+        init();
+        // Refresh sidebar
         updateSidebarContent();
       }
 
@@ -1117,6 +1116,7 @@
         html += '<button onclick="event.stopPropagation();sidebarShareRef()" style="border:none;background:#e8f5e9;color:#2e7d32;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;" title="Share Referral Link"><i class="bi bi-send"></i></button>';
         html += '</div></div>';
         html += '<div class="sb-menu-item" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i><div class="sb-menu-text"><h5>' + L('sb_organizer') + '</h5><p>' + L('sb_organizer_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
+        html += '<div class="sb-menu-item" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i><div class="sb-menu-text"><h5>' + L('sb_wings') + '</h5><p>' + L('sb_wings_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         html += '<div class="sb-menu-item" onclick="doMenuHelp()"><i class="bi bi-question-circle"></i><div class="sb-menu-text"><h5>' + L('sb_help') + '</h5><p>' + L('sb_help_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         // Language Toggle
         html += '<div class="sb-menu-item" style="cursor:default;"><i class="bi bi-translate"></i><div class="sb-menu-text"><h5>' + L('lang_label') + '</h5><p>English / தமிழ்</p></div>';
@@ -1307,6 +1307,63 @@
           h += '<button class="action-btn confirm" onclick="shareReferral(\'' + refLink + '\')" style="flex:1;"><i class="bi bi-send"></i> ' + L('ref_share_link') + '</button>';
           h += '</div>';
         }
+        await botReply(h, 800);
+      };
+
+      window.doMenuWings = async function () {
+        closeSidebar();
+        const wings = [
+          { en: "Women's - Entrepreneur Wing", ta: 'மகளிர் - தொழில்முனைவோர் பிரிவு' },
+          { en: "Auditor's Wing", ta: 'பட்டய கணக்காளர்கள் பிரிவு' },
+          { en: "Doctor's Wing", ta: 'மருத்துவர் பிரிவு' },
+          { en: 'Advocate Wing', ta: 'வழக்கறிஞர் பிரிவு' },
+          { en: 'Agriculture Wing', ta: 'விவசாய பிரிவு' },
+          { en: 'Information Technology Wing', ta: 'தகவல் தொழில்நுட்ப பிரிவு' },
+          { en: 'Engineer Wing', ta: 'பொறியாளர் பிரிவு' },
+          { en: 'Labor Wing', ta: 'தொழிலாளர் பிரிவு' },
+          { en: 'Differently Abled Wing', ta: 'மாற்றுத்திறனாளிகள் பிரிவு' },
+          { en: 'Young Entrepreneur Wing', ta: 'இளைய தொழில் முனைவோர் பிரிவு' },
+          { en: "Spokesperson's Wing", ta: 'செய்தி தொடர்பாளர் பிரிவு' },
+          { en: "Distributor's Wing", ta: 'விநியோகஸ்தர் பிரிவு' },
+          { en: "Manufacturer's Wing", ta: 'உற்பத்தியாளர் பிரிவு' },
+          { en: 'Real Estate Industry Wing', ta: 'மனைத்தொழில் பிரிவு' },
+          { en: 'Pharmacist & Pharma Business Wing', ta: 'மருந்தாளுனர் & மருந்து வணிகப் பிரிவு' },
+          { en: "Educator's Wing", ta: 'கல்வியாளர் பிரிவு' },
+          { en: 'Import & Export Business Wing', ta: 'இறக்குமதி / ஏற்றுமதி வணிக பிரிவு' },
+          { en: "Third Gender Entrepreneur's Wing", ta: 'மூன்றாம் பாலினத்தவர் தொழில் முனைவோர் பிரிவு' },
+          { en: "Shop Owner's Wing", ta: 'கடை உரிமையாளர் பிரிவு' },
+          { en: 'Central Government Relationship Wing', ta: 'மத்திய அரசு உறவுப் பிரிவு' },
+          { en: 'State Government Relationship Wing', ta: 'மாநில அரசு உறவுப் பிரிவு' },
+          { en: "Restaurant Owner's Wing", ta: 'உணவக உரிமையாளர் பிரிவு' },
+          { en: 'Tourism & Transport Business Wing', ta: 'சுற்றுலா மற்றும் போக்குவரத்து வணிக பிரிவு' },
+          { en: 'Sports & Sports Business Wing', ta: 'விளையாட்டு & விளையாட்டு வணிகப் பிரிவு' },
+          { en: 'Marine Based Business Wing', ta: 'கடல் சார்ந்த வணிகப் பிரிவு' },
+          { en: "Tribe's - Entrepreneur's Wing", ta: 'பழங்குடியினர் - தொழில்முனைவோர் பிரிவு' },
+          { en: "Digital Promoter's Wing", ta: 'டிஜிட்டல் விளம்பரதாரர் பிரிவு' },
+          { en: 'Printing & Press Business Wing', ta: 'அச்சக தொழில் பிரிவு' },
+          { en: 'Computer & Mobile Business Wing', ta: 'கணினி மற்றும் அலைபேசி தொழில் பிரிவு' },
+          { en: 'Weaver Business Wing', ta: 'நெசவாளர் வணிக பிரிவு' },
+          { en: 'Finance, Insurance & Chit Fund Business Wing', ta: 'காப்பீடு, நிதி மற்றும் சீட்டு தொழில்முனைவோர் பிரிவு' },
+          { en: "Roadside Vendor's Wing", ta: 'சாலையோர வியாபாரிகள் பிரிவு' },
+          { en: 'Lodging Business Wing', ta: 'தங்கும் விடுதி வணிகப் பிரிவு' },
+          { en: 'Beautician & Fitness Business Wing', ta: 'அழகுக்கலை மற்றும் உடற்பயிற்சி வணிகப் பிரிவு' },
+        ];
+        let h = '<i class="bi bi-diagram-3" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('wings_title') + '</strong>';
+        h += '<div style="margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid #c8e6c9;">';
+        // General Wing header
+        h += '<div style="background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;padding:12px 14px;font-weight:700;font-size:0.95rem;text-align:center;">';
+        h += '<i class="bi bi-star-fill" style="color:#fdd835;"></i> ' + L('wings_general');
+        h += '</div>';
+        // Wings table
+        h += '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">';
+        for (let i = 0; i < wings.length; i++) {
+          const bg = i % 2 === 0 ? '#f0f9f1' : '#fff';
+          const w = wings[i][currentLang] || wings[i]['en'];
+          h += '<tr style="background:' + bg + ';"><td style="padding:9px 12px;border-bottom:1px solid #e8f5e9;">';
+          h += '<span style="color:#2e7d32;font-weight:600;margin-right:6px;">' + (i + 1) + '.</span> ' + w;
+          h += '</td></tr>';
+        }
+        h += '</table></div>';
         await botReply(h, 800);
       };
 
