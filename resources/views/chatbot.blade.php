@@ -838,7 +838,12 @@
         if (user && user.memberData && !user.memberData.details_completed) {
           html += '<div class="sb-menu-item" onclick="doMenuUpdateDetails()" style="background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.3);"><i class="bi bi-pencil-square" style="color:#e65100;"></i><div class="sb-menu-text"><h5 style="color:#e65100;">Update Details</h5><p>Complete your membership details</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         }
-        html += '<div class="sb-menu-item" onclick="doMenuRefer()"><i class="bi bi-share"></i><div class="sb-menu-text"><h5>Refer a Friend</h5><p>Share your referral link</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
+        html += '<div class="sb-menu-item" style="flex-wrap:wrap;">';
+        html += '<i class="bi bi-share"></i><div class="sb-menu-text" onclick="doMenuRefer()" style="cursor:pointer;"><h5>Refer a Friend</h5><p>Share your referral link</p></div>';
+        html += '<div style="display:flex;gap:6px;">';
+        html += '<button onclick="event.stopPropagation();sidebarCopyRef()" style="border:none;background:#e8f5e9;color:#2e7d32;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;" title="Copy Referral Link"><i class="bi bi-clipboard"></i></button>';
+        html += '<button onclick="event.stopPropagation();sidebarShareRef()" style="border:none;background:#e8f5e9;color:#2e7d32;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;" title="Share Referral Link"><i class="bi bi-send"></i></button>';
+        html += '</div></div>';
         html += '<div class="sb-menu-item" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i><div class="sb-menu-text"><h5>Become an Organizer</h5><p>Need 25+ referrals to qualify</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         html += '<div class="sb-menu-item" onclick="doMenuHelp()"><i class="bi bi-question-circle"></i><div class="sb-menu-text"><h5>Help & Support</h5><p>Get assistance or report issues</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         html += '<div class="sb-menu-item" onclick="doMenuLogout()"><i class="bi bi-box-arrow-right" style="color:#d32f2f;"></i><div class="sb-menu-text"><h5 style="color:#d32f2f;">Logout</h5><p>Sign out and clear session</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
@@ -936,10 +941,58 @@
         }
       };
 
+      // Sidebar quick copy/share referral helpers
+      window.sidebarCopyRef = async function () {
+        const user = getUser();
+        if (!user || !user.memberData || !user.memberData.unique_id) return;
+        try {
+          const res = await api('/api/vanigam/get-referral', { unique_id: user.memberData.unique_id });
+          if (res.success) {
+            navigator.clipboard.writeText(res.referral_link).then(() => {
+              const toast = document.createElement('div');
+              toast.textContent = '✅ Referral link copied!';
+              toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1b5e20;color:#fff;padding:10px 20px;border-radius:20px;font-size:0.85rem;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+              document.body.appendChild(toast);
+              setTimeout(() => toast.remove(), 2000);
+            });
+          }
+        } catch(e) {}
+      };
+      window.sidebarShareRef = async function () {
+        const user = getUser();
+        if (!user || !user.memberData || !user.memberData.unique_id) return;
+        try {
+          const res = await api('/api/vanigam/get-referral', { unique_id: user.memberData.unique_id });
+          if (res.success) {
+            if (navigator.share) {
+              navigator.share({ title: 'Tamil Nadu Vanigargalin Sangamam', text: 'Join Vanigam and get your free membership card!', url: res.referral_link });
+            } else {
+              navigator.clipboard.writeText(res.referral_link).then(() => {
+                const toast = document.createElement('div');
+                toast.textContent = '✅ Referral link copied!';
+                toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1b5e20;color:#fff;padding:10px 20px;border-radius:20px;font-size:0.85rem;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+              });
+            }
+          }
+        } catch(e) {}
+      };
+
       window.doMenuOrganizer = async function () {
         closeSidebar();
         const user = getUser();
-        const rc = (user && user.memberData) ? (user.memberData.referral_count || 0) : 0;
+        if (!user || !user.memberData || !user.memberData.unique_id) {
+          await botReply('\u274C Please complete registration first.', 600);
+          return;
+        }
+        const rc = user.memberData.referral_count || 0;
+        let refLink = '';
+        try {
+          const res = await api('/api/vanigam/get-referral', { unique_id: user.memberData.unique_id });
+          if (res.success) refLink = res.referral_link;
+        } catch(e) {}
+
         let h = '<i class="bi bi-briefcase" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>Become an Organizer</strong>';
         h += '<div style="margin-top:10px;padding:14px;background:#f0f9f1;border-radius:12px;border:1px solid #c8e6c9;">';
         if (rc >= 25) {
@@ -959,6 +1012,13 @@
           h += '</div>';
         }
         h += '</div>';
+        // Add copy/share referral buttons
+        if (refLink) {
+          h += '<div style="margin-top:10px;display:flex;gap:8px;">';
+          h += '<button class="action-btn confirm" onclick="copyReferral(\'' + refLink + '\')" style="flex:1;"><i class="bi bi-clipboard"></i> Copy Link</button>';
+          h += '<button class="action-btn confirm" onclick="shareReferral(\'' + refLink + '\')" style="flex:1;"><i class="bi bi-send"></i> Share Link</button>';
+          h += '</div>';
+        }
         await botReply(h, 800);
       };
 
