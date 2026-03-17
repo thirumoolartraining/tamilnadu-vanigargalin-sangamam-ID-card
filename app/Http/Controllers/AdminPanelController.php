@@ -95,9 +95,19 @@ class AdminPanelController extends Controller
 
         $referredMembers = $this->mongo->getMembersReferredBy($uniqueId);
 
+        // Fetch referred_by person details
+        $referredByMember = null;
+        if (!empty($member['referred_by'])) {
+            $referredByMember = $this->mongo->findMemberByUniqueId($member['referred_by']);
+            if ($referredByMember) {
+                unset($referredByMember['pin_hash']);
+            }
+        }
+
         return view('admin.user-detail', [
             'member' => (object) $member,
             'referred_members' => $referredMembers,
+            'referred_by_member' => $referredByMember ? (object) $referredByMember : null,
         ]);
     }
 

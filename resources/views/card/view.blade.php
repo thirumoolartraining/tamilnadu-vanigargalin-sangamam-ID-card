@@ -351,10 +351,10 @@
         document.getElementById('memberUniqueId').textContent = m.unique_id || '';
 
         // Back - show XXXXXXX for empty fields
-        document.getElementById('memberDob').textContent = m.dob || 'XXXXXXX';
-        document.getElementById('memberAge').textContent = m.age || 'XXXXXXX';
-        document.getElementById('memberBlood').textContent = m.blood_group || 'XXXXXXX';
-        document.getElementById('memberAddress').textContent = m.address || 'XXXXXXX';
+        document.getElementById('memberDob').textContent = m.dob || 'xxxxxx';
+        document.getElementById('memberAge').textContent = m.age || 'xxxxxx';
+        document.getElementById('memberBlood').textContent = m.blood_group || 'xxxxxx';
+        document.getElementById('memberAddress').textContent = m.address || 'xxxxxx';
         document.getElementById('memberContact').textContent = m.contact_number || ('+91 ' + (m.mobile || ''));
 
         // QR

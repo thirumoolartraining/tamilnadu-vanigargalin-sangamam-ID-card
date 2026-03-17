@@ -152,11 +152,11 @@
 
     /* ── Reset ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: var(--color-bg); }
+    html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: var(--color-bg); -webkit-text-size-adjust: 100%; }
 
     .chat-app {
-      display: flex; flex-direction: column; height: 100dvh; max-height: 100vh;
-      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; height: 100vh; height: 100dvh;
+      position: relative; overflow: hidden; max-width: 100vw;
     }
     .chat-wallpaper {
       position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -490,16 +490,30 @@
       .chat-input-area { padding: 10px 5% max(10px, env(safe-area-inset-bottom)); }
     }
     @media (max-width: 600px) {
-      .chat-messages { padding: 12px; }
-      .chat-input-area { padding: 8px 12px max(8px, env(safe-area-inset-bottom)); gap: 8px; }
-      .message .bubble { max-width: 85%; font-size: 0.9rem; }
+      .chat-messages { padding: 12px 10px; }
+      .chat-input-area { padding: 8px 10px max(8px, env(safe-area-inset-bottom)); gap: 8px; }
+      .message .bubble { max-width: 88%; font-size: 0.9rem; padding: 8px 12px; }
       .banner-message .bubble { max-width: 95%; }
-      .chat-header { padding: max(10px, env(safe-area-inset-top)) 14px 10px 14px; gap: 10px; }
-      .chat-header .avatar { width: 40px; height: 40px; }
-      .chat-header .info h4 { font-size: 1rem; }
+      .chat-header { padding: max(10px, env(safe-area-inset-top)) 12px 10px 12px; gap: 10px; }
+      .chat-header .avatar { width: 38px; height: 38px; }
+      .chat-header .info h4 { font-size: 0.95rem; }
+      .chat-header .info .status { font-size: 0.75rem; }
       .chat-input-area .send-btn, .chat-input-area .attach-btn { width: 42px; height: 42px; font-size: 1.15rem; }
-      .input-wrapper input { padding: 12px 16px; font-size: 0.9rem; }
-      .bot-avatar-img { width: 32px; height: 32px; }
+      .input-wrapper input { padding: 12px 14px; font-size: 0.9rem; }
+      .bot-avatar-img { width: 30px; height: 30px; }
+      .user-avatar-svg { width: 30px; height: 30px; font-size: 1rem; }
+      .card-preview-wrap .card-img { max-width: 100%; }
+      .action-buttons { gap: 8px; }
+      .action-btn { padding: 8px 16px; font-size: 0.82rem; }
+      .sidebar-panel { width: 300px; }
+    }
+    @media (max-width: 380px) {
+      .chat-messages { padding: 10px 6px; }
+      .chat-input-area { padding: 6px 8px max(6px, env(safe-area-inset-bottom)); gap: 6px; }
+      .message .bubble { max-width: 90%; font-size: 0.85rem; }
+      .chat-header .info h4 { font-size: 0.88rem; }
+      .input-wrapper input { padding: 10px 12px; font-size: 0.85rem; }
+      .chat-input-area .send-btn, .chat-input-area .attach-btn { width: 38px; height: 38px; font-size: 1.05rem; }
     }
 
     /* Auto dark mode from OS preference */
@@ -582,7 +596,6 @@
         <div class="status">Digital Member ID Card</div>
       </div>
       <div class="actions">
-        <i class="bi bi-moon-stars" id="themeToggle" style="cursor:pointer;" title="Toggle Theme"></i>
         <i class="bi bi-list" id="menuToggle" style="cursor:pointer;" title="Menu"></i>
       </div>
     </div>
@@ -709,6 +722,12 @@
           sbName.textContent = m.name || 'Vanigam Member';
           sbId.textContent = m.unique_id || 'Member';
 
+          // Update sidebar avatar with user photo
+          const sbAvatar = document.querySelector('.sidebar-header .sb-avatar');
+          if (sbAvatar && m.photo_url) {
+            sbAvatar.innerHTML = '<img src="' + m.photo_url + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+          }
+
           // Profile Section
           html += '<div class="sb-section"><div class="sb-section-title">Profile</div>';
           html += '<div class="sb-profile">';
@@ -754,10 +773,10 @@
           html += '<div style="position:relative;width:100%;height:100%;background:url(https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232519/vanigan/templates/ID_Back.png) center/contain no-repeat;">';
           // Back fields
           html += '<div style="position:absolute;top:28%;left:6%;right:6%;font-size:0.38rem;line-height:1.2;display:flex;flex-direction:column;gap:2px;overflow:hidden;">';
-          html += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:10px;"><span style="font-weight:700;">DATE OF BIRTH</span><span style="font-weight:700;">:</span><span>' + (m.dob || '') + '</span></div>';
-          html += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:10px;"><span style="font-weight:700;">AGE</span><span style="font-weight:700;">:</span><span>' + (m.age || '') + '</span></div>';
-          html += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:10px;"><span style="font-weight:700;">BLOOD GROUP</span><span style="font-weight:700;">:</span><span>' + (m.blood_group || '') + '</span></div>';
-          html += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:30px;"><span style="font-weight:700;">ADDRESS</span><span style="font-weight:700;">:</span><span style="font-size:0.34rem;word-break:break-word;overflow:hidden;">' + (m.address || '') + '</span></div>';
+          html += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:10px;"><span style="font-weight:700;">DATE OF BIRTH</span><span style="font-weight:700;">:</span><span>' + (m.dob || 'xxxxxx') + '</span></div>';
+          html += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:10px;"><span style="font-weight:700;">AGE</span><span style="font-weight:700;">:</span><span>' + (m.age || 'xxxxxx') + '</span></div>';
+          html += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:10px;"><span style="font-weight:700;">BLOOD GROUP</span><span style="font-weight:700;">:</span><span>' + (m.blood_group || 'xxxxxx') + '</span></div>';
+          html += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:30px;"><span style="font-weight:700;">ADDRESS</span><span style="font-weight:700;">:</span><span style="font-size:0.34rem;word-break:break-word;overflow:hidden;">' + (m.address || 'xxxxxx') + '</span></div>';
           html += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:10px;"><span style="font-weight:700;">CONTACT</span><span style="font-weight:700;">:</span><span>' + (m.contact_number || '') + '</span></div>';
           html += '</div>';
           // QR + Signature
@@ -1118,11 +1137,11 @@
 
       function setNumeric(ph) { input.type = 'tel'; input.inputMode = 'numeric'; input.pattern = '[0-9]*'; input.placeholder = ph || ''; }
       function setText(ph) { input.type = 'text'; input.inputMode = 'text'; input.autocapitalize = 'off'; input.removeAttribute('pattern'); input.placeholder = ph || ''; }
-      function setEpicInput(ph) { input.type = 'text'; input.inputMode = 'text'; input.autocapitalize = 'characters'; input.removeAttribute('pattern'); input.placeholder = ph || ''; }
+      function setEpicInput(ph) { input.type = 'text'; input.inputMode = 'text'; input.autocapitalize = 'characters'; input.removeAttribute('pattern'); input.placeholder = ph || ''; sendBtn.disabled = true; }
       function showAttach() { attachBtn.classList.add('visible'); }
       function hideAttach() { attachBtn.classList.remove('visible'); }
       function lockInput() { input.disabled = true; sendBtn.disabled = true; }
-      function unlockInput() { input.disabled = false; sendBtn.disabled = false; input.focus(); }
+      function unlockInput() { input.disabled = false; if (state !== S.AWAIT_EPIC) sendBtn.disabled = false; input.focus(); }
 
       /* ── API wrapper ── */
       async function api(url, body, isForm) {
@@ -1778,10 +1797,10 @@
         h += '<div class="card-label">Back</div>';
         h += '<div style="position:relative;width:100%;padding-bottom:146%;background:url(https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232519/vanigan/templates/ID_Back.png) center/contain no-repeat;border-radius:10px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.12);cursor:pointer;" onclick="window.open(\'' + cardUrl + '\',\'_blank\')">';
         h += '<div style="position:absolute;top:28%;left:6%;right:6%;font-size:0.65rem;line-height:1.3;display:flex;flex-direction:column;gap:4px;">';
-        h += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:16px;"><span style="font-weight:700;">DATE OF BIRTH</span><span style="font-weight:700;">:</span><span>' + (m.dob || '') + '</span></div>';
-        h += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:16px;"><span style="font-weight:700;">AGE</span><span style="font-weight:700;">:</span><span>' + (m.age || '') + '</span></div>';
-        h += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:16px;"><span style="font-weight:700;">BLOOD GROUP</span><span style="font-weight:700;">:</span><span>' + (m.blood_group || '') + '</span></div>';
-        h += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:50px;"><span style="font-weight:700;">ADDRESS</span><span style="font-weight:700;">:</span><span style="font-size:0.55rem;word-break:break-word;">' + (m.address || '') + '</span></div>';
+        h += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:16px;"><span style="font-weight:700;">DATE OF BIRTH</span><span style="font-weight:700;">:</span><span>' + (m.dob || 'xxxxxx') + '</span></div>';
+        h += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:16px;"><span style="font-weight:700;">AGE</span><span style="font-weight:700;">:</span><span>' + (m.age || 'xxxxxx') + '</span></div>';
+        h += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:16px;"><span style="font-weight:700;">BLOOD GROUP</span><span style="font-weight:700;">:</span><span>' + (m.blood_group || 'xxxxxx') + '</span></div>';
+        h += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:50px;"><span style="font-weight:700;">ADDRESS</span><span style="font-weight:700;">:</span><span style="font-size:0.55rem;word-break:break-word;">' + (m.address || 'xxxxxx') + '</span></div>';
         h += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:16px;"><span style="font-weight:700;">CONTACT</span><span style="font-weight:700;">:</span><span>' + (m.contact_number || '') + '</span></div>';
         h += '</div>';
         h += '<div style="position:absolute;bottom:15%;left:5%;right:5%;display:flex;align-items:flex-end;justify-content:space-between;">';
@@ -1942,7 +1961,7 @@
       photoInput.addEventListener('change', (e) => { handlePhotoFile(e.target.files[0]); photoInput.value = ''; });
       cameraInput.addEventListener('change', (e) => { handlePhotoFile(e.target.files[0]); cameraInput.value = ''; });
 
-      /* ── EPIC auto-formatting ── */
+      /* ── EPIC auto-formatting + send button lock ── */
       input.addEventListener('input', function () {
         if (state !== S.AWAIT_EPIC) return;
         let val = this.value;
@@ -1951,17 +1970,13 @@
         this.value = prefix + rest;
         if (prefix.length >= 3 && this.inputMode !== 'numeric') { this.inputMode = 'numeric'; this.autocapitalize = 'off'; }
         else if (prefix.length < 3 && this.inputMode !== 'text') { this.inputMode = 'text'; this.autocapitalize = 'characters'; }
+        // Lock send button until valid EPIC format: 3 letters + 7+ digits
+        sendBtn.disabled = !(prefix.length >= 3 && rest.length >= 7);
       });
 
       /* ── Events ── */
       sendBtn.addEventListener('click', handleSend);
       input.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSend(); });
-
-      /* ── Theme Toggle ── */
-      document.getElementById('themeToggle').addEventListener('click', function () {
-        document.body.classList.toggle('dark-mode');
-        this.className = document.body.classList.contains('dark-mode') ? 'bi bi-sun-fill' : 'bi bi-moon-stars';
-      });
 
       /* ── Boot ── */
       window.addEventListener('load', init);

@@ -194,8 +194,24 @@
               <div class="referral-id">{{ $member->referral_id }}</div>
               @endif
               @if(!empty($member->referred_by))
-              <div style="margin-top:12px;font-size:0.8rem;color:#666;">Referred by</div>
+              <div style="margin-top:12px;font-size:0.8rem;color:#666;margin-bottom:8px;">Referred by</div>
+              @if(!empty($referred_by_member))
+              <a href="{{ route('admin.user.detail', $member->referred_by) }}" style="text-decoration:none;display:flex;align-items:center;gap:12px;padding:10px 12px;background:#fff;border:1px solid #e0e3e6;border-radius:12px;">
+                @if(!empty($referred_by_member->photo_url))
+                <img src="{{ $referred_by_member->photo_url }}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e8f5e9;flex-shrink:0;">
+                @else
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#007a38,#00a84e);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;flex-shrink:0;">{{ strtoupper(substr($referred_by_member->name ?? '?', 0, 1)) }}</div>
+                @endif
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:700;color:#1a1a1a;font-size:0.88rem;">{{ $referred_by_member->name ?? 'N/A' }}</div>
+                  <div style="font-size:0.75rem;color:#888;font-family:monospace;">{{ $referred_by_member->unique_id ?? '' }}</div>
+                  <div style="font-size:0.72rem;color:#666;margin-top:2px;">{{ $referred_by_member->assembly ?? '' }} &bull; {{ $referred_by_member->district ?? '' }}</div>
+                </div>
+                <i class="bi bi-chevron-right" style="color:#ccc;"></i>
+              </a>
+              @else
               <div style="margin-top:4px;"><a href="{{ route('admin.user.detail', $member->referred_by) }}" style="color:#2e7d32;font-weight:600;text-decoration:none;">{{ $member->referred_by }}</a></div>
+              @endif
               @endif
             </div>
 
@@ -260,10 +276,10 @@
                   <div class="card3d-face card3d-back">
                     <div style="position:relative;width:100%;height:100%;background:url('https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232519/vanigan/templates/ID_Back.png') center/contain no-repeat;border-radius:12px;">
                       <div style="position:absolute;top:28%;left:6%;right:6%;font-size:0.55rem;line-height:1.3;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
-                        <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">DATE OF BIRTH</span><span style="font-weight:700;">:</span><span>{{ !empty($member->dob) ? $member->dob : 'XXXXXXX' }}</span></div>
-                        <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">AGE</span><span style="font-weight:700;">:</span><span>{{ !empty($member->age) ? $member->age : 'XXXXXXX' }}</span></div>
-                        <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">BLOOD GROUP</span><span style="font-weight:700;">:</span><span>{{ !empty($member->blood_group) ? $member->blood_group : 'XXXXXXX' }}</span></div>
-                        <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:40px;"><span style="font-weight:700;">ADDRESS</span><span style="font-weight:700;">:</span><span style="font-size:0.48rem;word-break:break-word;overflow:hidden;">{{ !empty($member->address) ? $member->address : 'XXXXXXX' }}</span></div>
+                        <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">DATE OF BIRTH</span><span style="font-weight:700;">:</span><span>{{ !empty($member->dob) ? $member->dob : 'xxxxxx' }}</span></div>
+                        <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">AGE</span><span style="font-weight:700;">:</span><span>{{ !empty($member->age) ? $member->age : 'xxxxxx' }}</span></div>
+                        <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">BLOOD GROUP</span><span style="font-weight:700;">:</span><span>{{ !empty($member->blood_group) ? $member->blood_group : 'xxxxxx' }}</span></div>
+                        <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:40px;"><span style="font-weight:700;">ADDRESS</span><span style="font-weight:700;">:</span><span style="font-size:0.48rem;word-break:break-word;overflow:hidden;">{{ !empty($member->address) ? $member->address : 'xxxxxx' }}</span></div>
                         <div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:14px;"><span style="font-weight:700;">CONTACT</span><span style="font-weight:700;">:</span><span>{{ $member->contact_number ?? '' }}</span></div>
                       </div>
                       <div style="position:absolute;bottom:18%;left:5%;right:5%;display:flex;align-items:flex-end;justify-content:space-between;">

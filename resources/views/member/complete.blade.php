@@ -41,10 +41,44 @@
     .already-done h3 { margin-top: 12px; color: #1b5e20; }
     .already-done p { color: #666; margin-top: 8px; font-size: 0.9rem; }
     .footer { text-align: center; padding: 16px 24px 24px; font-size: 0.78rem; color: #999; }
+    .pin-box {
+      width: 52px; height: 58px; text-align: center; font-size: 1.5rem; font-weight: 700;
+      border: 2px solid #dfe1e5; border-radius: 12px; outline: none; font-family: monospace;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .pin-box:focus { border-color: #2e7d32; box-shadow: 0 0 0 3px rgba(46,125,50,0.15); }
   </style>
 </head>
 <body>
-  <div class="card">
+  <!-- PIN Entry Section -->
+  <div class="card" id="pinSection">
+    <div class="card-header">
+      <h2><i class="bi bi-shield-lock"></i> Verify Your Identity</h2>
+      <p>Enter your secret PIN to continue</p>
+    </div>
+    <div class="card-body" style="text-align:center;">
+      <div style="margin-bottom:20px;">
+        <i class="bi bi-person-badge" style="font-size:3rem;color:#2e7d32;"></i>
+        <h3 style="font-size:1.1rem;font-weight:700;color:#333;margin:10px 0 4px;">{{ $member->name ?? '' }}</h3>
+        <p style="font-size:0.82rem;color:#888;font-family:monospace;">{{ $member->unique_id ?? '' }}</p>
+      </div>
+      <p style="font-size:0.9rem;color:#555;margin-bottom:16px;">Enter your 4-digit secret PIN</p>
+      <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;" id="pinInputs">
+        <input type="tel" maxlength="1" class="pin-box" data-idx="0" autocomplete="off" inputmode="numeric">
+        <input type="tel" maxlength="1" class="pin-box" data-idx="1" autocomplete="off" inputmode="numeric">
+        <input type="tel" maxlength="1" class="pin-box" data-idx="2" autocomplete="off" inputmode="numeric">
+        <input type="tel" maxlength="1" class="pin-box" data-idx="3" autocomplete="off" inputmode="numeric">
+      </div>
+      <div id="pinError" style="color:#d32f2f;font-size:0.85rem;margin-bottom:12px;display:none;"></div>
+      <button id="pinSubmitBtn" class="submit-btn" onclick="verifyPin()">
+        <i class="bi bi-unlock-fill"></i> Verify PIN
+      </button>
+    </div>
+    <div class="footer">Tamil Nadu Vanigargalin Sangamam &copy; {{ date('Y') }}</div>
+  </div>
+
+  <!-- Details Form Section (hidden until PIN verified) -->
+  <div class="card" id="detailsSection" style="display:none;">
     <div class="card-header">
       <h2><i class="bi bi-pencil-square"></i> Complete Your Details</h2>
       <p>Fill in missing information for your Tamil Nadu Vanigargalin Sangamam</p>
@@ -97,6 +131,60 @@
       Tamil Nadu Vanigargalin Sangamam &copy; {{ date('Y') }}
     </div>
   </div>
+
+  <script>
+    // PIN input handling
+    const pinBoxes = document.querySelectorAll('.pin-box');
+    pinBoxes.forEach((box, i) => {
+      box.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+        if (this.value && i < 3) pinBoxes[i + 1].focus();
+      });
+      box.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !this.value && i > 0) pinBoxes[i - 1].focus();
+        if (e.key === 'Enter') verifyPin();
+      });
+    });
+    pinBoxes[0].focus();
+
+    async function verifyPin() {
+      const pin = Array.from(pinBoxes).map(b => b.value).join('');
+      if (pin.length !== 4) {
+        document.getElementById('pinError').textContent = 'Please enter all 4 digits.';
+        document.getElementById('pinError').style.display = 'block';
+        return;
+      }
+      const btn = document.getElementById('pinSubmitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;"></span> Verifying...';
+      document.getElementById('pinError').style.display = 'none';
+
+      try {
+        const res = await fetch('/api/vanigam/verify-member-pin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ unique_id: '{{ $unique_id }}', pin: pin })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('pinSection').style.display = 'none';
+          document.getElementById('detailsSection').style.display = 'block';
+        } else {
+          document.getElementById('pinError').textContent = data.message || 'Invalid PIN.';
+          document.getElementById('pinError').style.display = 'block';
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Verify PIN';
+          pinBoxes.forEach(b => b.value = '');
+          pinBoxes[0].focus();
+        }
+      } catch(e) {
+        document.getElementById('pinError').textContent = 'Network error. Please try again.';
+        document.getElementById('pinError').style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Verify PIN';
+      }
+    }
+  </script>
 
   @if(empty($member->details_completed) || !$member->details_completed)
   <script>
