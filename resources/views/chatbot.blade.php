@@ -1445,7 +1445,7 @@
         lockInput();
         let h = L('lets_complete') + '<br><br>';
         h += L('select_dob');
-        h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;"></div>';
+        h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;-webkit-appearance:none;appearance:none;height:48px;line-height:1.2;"></div>';
         h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_dob') + '</button></div>';
         await botReply(h, 700);
       };
@@ -1461,7 +1461,7 @@
         lockInput();
         let h = L('lets_complete') + '<br><br>';
         h += L('select_dob');
-        h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;"></div>';
+        h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;-webkit-appearance:none;appearance:none;height:48px;line-height:1.2;"></div>';
         h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_dob') + '</button></div>';
         await botReply(h, 700);
       };
@@ -1585,7 +1585,7 @@
       function showAttach() { attachBtn.classList.add('visible'); }
       function hideAttach() { attachBtn.classList.remove('visible'); }
       function lockInput() { input.disabled = true; sendBtn.disabled = true; }
-      function unlockInput() { input.disabled = false; if (state !== S.AWAIT_EPIC) sendBtn.disabled = false; input.focus(); }
+      function unlockInput() { input.disabled = false; if (state !== S.AWAIT_EPIC && state !== S.AWAIT_PIN && state !== S.AWAIT_PIN_CONFIRM && state !== S.AWAIT_RETURNING_PIN) sendBtn.disabled = false; input.focus(); }
 
       /* ── API wrapper ── */
       async function api(url, body, isForm) {
@@ -1755,6 +1755,7 @@
               state = S.AWAIT_RETURNING_PIN;
               setNumeric(L('ph_pin'));
               unlockInput();
+              sendBtn.disabled = true;
               let welcomeText = L('welcome_back_pin', { name: checkRes.name ? ', <strong>' + checkRes.name + '</strong>' : '' });
               await botReply(welcomeText, 800);
             } else {
@@ -1905,6 +1906,7 @@
           pin = p;
           state = S.AWAIT_PIN_CONFIRM;
           setNumeric(L('ph_reenter_pin'));
+          sendBtn.disabled = true;
           await botReply(L('confirm_pin'), 700);
 
         } else if (state === S.AWAIT_PIN_CONFIRM) {
@@ -1913,6 +1915,7 @@
           if (p !== pin) {
             state = S.AWAIT_PIN;
             setNumeric(L('ph_pin'));
+            sendBtn.disabled = true;
             pin = '';
             await botReply(L('pin_mismatch'), 600);
             return;
@@ -2048,6 +2051,7 @@
       async function askPinSetup() {
         state = S.AWAIT_PIN;
         setNumeric(L('ph_pin'));
+        sendBtn.disabled = true;
         let h = L('set_pin');
         h += '<br><br><em style="color:#667781;font-size:0.85rem;">' + L('pin_hint') + '</em>';
         await botReply(h, 800);
@@ -2071,7 +2075,7 @@
         skippedDetails = false;
         lockInput();
         let h = L('select_dob');
-        h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;"></div>';
+        h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;-webkit-appearance:none;appearance:none;height:48px;line-height:1.2;"></div>';
         h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_dob') + '</button></div>';
         await botReply(h, 700);
       };
@@ -2411,6 +2415,12 @@
 
       /* ── EPIC auto-formatting + send button lock ── */
       input.addEventListener('input', function () {
+        // PIN states: limit to 4 digits, lock send until exactly 4
+        if (state === S.AWAIT_PIN || state === S.AWAIT_PIN_CONFIRM || state === S.AWAIT_RETURNING_PIN) {
+          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+          sendBtn.disabled = this.value.length !== 4;
+          return;
+        }
         if (state !== S.AWAIT_EPIC) return;
         let val = this.value;
         let prefix = val.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, '');

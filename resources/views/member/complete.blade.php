@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Complete Your Details — Tamil Nadu Vanigargalin Sangamam</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -22,7 +22,9 @@
     .form-group input, .form-group select, .form-group textarea {
       width: 100%; padding: 12px 14px; border: 1px solid #dfe1e5; border-radius: 12px;
       font-size: 0.95rem; outline: none; transition: border-color 0.2s; font-family: inherit;
+      -webkit-appearance: none; appearance: none;
     }
+    .form-group input[type="date"] { height: 48px; line-height: 1.2; }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #2e7d32; }
     .form-group textarea { resize: vertical; min-height: 80px; }
     .submit-btn {
