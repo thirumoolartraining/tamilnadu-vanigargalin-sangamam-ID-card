@@ -34,10 +34,43 @@ class MongoService
     protected function toArray($doc): ?array
     {
         if ($doc === null) return null;
+
+        // Convert BSON to array, handling special types
         $arr = json_decode(json_encode($doc), true);
+
+        // Recursively convert any nested arrays/objects that might still be BSON
+        $arr = $this->recursiveConvert($arr);
+
         // Remove MongoDB internal _id field
         unset($arr['_id']);
         return $arr;
+    }
+
+    /**
+     * Recursively convert BSON objects to safe values.
+     */
+    protected function recursiveConvert($value)
+    {
+        if (is_array($value)) {
+            foreach ($value as $key => $item) {
+                $value[$key] = $this->recursiveConvert($item);
+            }
+            return $value;
+        }
+
+        if (is_object($value)) {
+            // Convert BSON objects to string representation
+            if ($value instanceof \MongoDB\BSON\UTCDateTime) {
+                return $value->toDateTime()->format('Y-m-d H:i:s');
+            }
+            if ($value instanceof \MongoDB\BSON\ObjectId) {
+                return (string)$value;
+            }
+            // For other objects, try to convert to array
+            return json_decode(json_encode($value), true);
+        }
+
+        return $value;
     }
 
     /* ── public helpers ────────────────────────────────────── */
