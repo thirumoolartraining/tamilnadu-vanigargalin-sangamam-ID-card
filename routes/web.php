@@ -61,6 +61,11 @@ Route::get('/test/card', function () {
     ]);
 });
 
+// ── Test PIN Button ────────────────────────────────────────────────────
+Route::get('/test/pin', function () {
+    return response()->file(public_path('test-pin-button.html'));
+});
+
 // ── Admin Panel ────────────────────────────────────────────────────────
 Route::get('/admin/login', [AdminPanelController::class, 'showLogin'])->name('admin.login');
 Route::post('/admin/login', [AdminPanelController::class, 'login'])->name('admin.login.submit');

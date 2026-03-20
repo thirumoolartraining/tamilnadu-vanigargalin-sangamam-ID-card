@@ -21,8 +21,8 @@ class MongoService
 
     public function __construct()
     {
-        $url      = env('MONGO_URL', 'mongodb://localhost:27017');
-        $this->database = env('MONGO_DB_NAME', 'vanigan');
+        $url      = config('mongodb.url');
+        $this->database = config('mongodb.database');
 
         $this->client = new Client($url);
         $this->collection = $this->client->selectDatabase($this->database)->selectCollection('members');
@@ -101,7 +101,8 @@ class MongoService
     }
 
     /**
-     * Create or update a member document keyed on epic_no.
+     * Create or update a member document keyed on mobile number.
+     * This allows multiple members with the same EPIC but different mobiles.
      */
     public function upsertMember(string $epicNo, array $data): ?array
     {
@@ -109,16 +110,26 @@ class MongoService
             $data['epic_no']    = strtoupper($epicNo);
             $data['updated_at'] = now()->toISOString();
 
+            // Key by mobile instead of epic_no to allow duplicate EPICs
+            if (empty($data['mobile'])) {
+                Log::error("MongoService::upsertMember - mobile is required");
+                return null;
+            }
+
+            // Remove created_at from $data if it exists (to avoid conflict)
+            $createdAt = $data['created_at'] ?? now()->toISOString();
+            unset($data['created_at']);
+
             $this->collection->updateOne(
-                ['epic_no' => strtoupper($epicNo)],
+                ['mobile' => $data['mobile']],
                 [
                     '$set'         => $data,
-                    '$setOnInsert' => ['created_at' => now()->toISOString()],
+                    '$setOnInsert' => ['created_at' => $createdAt],
                 ],
                 ['upsert' => true]
             );
 
-            return $this->findMemberByEpic($epicNo);
+            return $this->findMemberByMobile($data['mobile']);
         } catch (Exception $e) {
             Log::error("MongoService::upsertMember Exception: " . $e->getMessage());
             return null;
@@ -501,6 +512,209 @@ class MongoService
             return $result->getDeletedCount() > 0;
         } catch (Exception $e) {
             Log::error("MongoService::deleteLoanRequestByUniqueId Exception: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Find all members with duplicate EPIC numbers.
+     * Returns array of EPICs that have multiple registrations with different mobiles.
+     */
+    public function findDuplicateEpics(): array
+    {
+        try {
+            $pipeline = [
+                ['$group' => [
+                    '_id' => '$epic_no',
+                    'count' => ['$sum' => 1],
+                    'members' => ['$push' => [
+                        'mobile' => '$mobile',
+                        'name' => '$name',
+                        'unique_id' => '$unique_id',
+                        'created_at' => '$created_at'
+                    ]]
+                ]],
+                ['$match' => ['count' => ['$gt' => 1]]],
+                ['$sort' => ['count' => -1]]
+            ];
+            
+            $results = $this->collection->aggregate($pipeline)->toArray();
+            return array_map(fn($doc) => json_decode(json_encode($doc), true), $results);
+        } catch (Exception $e) {
+            Log::error("MongoService::findDuplicateEpics Exception: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Find all members with a specific EPIC number.
+     * Returns array of all members (useful for finding duplicates).
+     */
+    public function findAllMembersByEpic(string $epicNo): array
+    {
+        try {
+            $cursor = $this->collection->find(
+                ['epic_no' => strtoupper($epicNo)],
+                ['sort' => ['created_at' => -1]]
+            );
+
+            $members = [];
+            foreach ($cursor as $doc) {
+                $member = $this->toArray($doc);
+                if ($member) {
+                    unset($member['pin_hash']);
+                    $members[] = $member;
+                }
+            }
+
+            return $members;
+        } catch (Exception $e) {
+            Log::error("MongoService::findAllMembersByEpic Exception: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════════
+     * MANUAL ENTRIES COLLECTION
+     * ---------------------------------------------------------------------------
+     * This collection stores users who registered with manually entered voter data
+     * (when their EPIC number was not found in the MySQL voters database).
+     *
+     * Schema:
+     * {
+     *   unique_id: string,       // TNVS-XXXXXX format
+     *   epic_no: string,         // MANUAL_XXXXXXXXX (pseudo-EPIC for manual entries)
+     *   mobile: string,          // 10-digit mobile number
+     *   name: string,            // User-provided name
+     *   assembly: string,        // User-provided assembly/taluk
+     *   district: string,        // Optional district (empty for manual entries)
+     *   photo_url: string,       // Cloudinary photo URL
+     *   manually_entered: true,  // Flag indicating manual entry
+     *   verified_by_admin: bool, // Whether admin has verified this entry
+     *   created_at: datetime,
+     *   updated_at: datetime
+     * }
+     *
+     * WHY ISOLATED:
+     * - Separates verified voter data from manually entered data
+     * - Allows admin review workflow for manual entries
+     * - Does NOT conflict with the main 'members' collection which contains
+     *   auto-verified voter records from MySQL lookup
+     * - Easy to query, audit, and manage unverified users separately
+     * ═══════════════════════════════════════════════════════════════════════════════ */
+
+    /**
+     * Store a manually entered user in the manual_entries collection.
+     * Called when EPIC lookup fails and user provides data manually.
+     */
+    public function storeManualEntry(array $data): ?array
+    {
+        try {
+            $db = $this->client->selectDatabase($this->database);
+            $manualCollection = $db->selectCollection('manual_entries');
+
+            $data['manually_entered'] = true;
+            $data['verified_by_admin'] = false;
+            $data['created_at'] = now()->toISOString();
+            $data['updated_at'] = now()->toISOString();
+
+            // Check if mobile already exists in manual entries
+            $existing = $manualCollection->findOne(['mobile' => $data['mobile']]);
+            if ($existing) {
+                // Update existing entry
+                $manualCollection->updateOne(
+                    ['mobile' => $data['mobile']],
+                    ['$set' => array_merge($data, ['updated_at' => now()->toISOString()])]
+                );
+            } else {
+                // Insert new entry
+                $manualCollection->insertOne($data);
+            }
+
+            Log::info("Manual entry stored: " . json_encode(['mobile' => $data['mobile'], 'name' => $data['name'] ?? '']));
+            return $data;
+        } catch (Exception $e) {
+            Log::error("MongoService::storeManualEntry Exception: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Find a manual entry by mobile number.
+     */
+    public function findManualEntryByMobile(string $mobile): ?array
+    {
+        try {
+            $db = $this->client->selectDatabase($this->database);
+            $manualCollection = $db->selectCollection('manual_entries');
+            $doc = $manualCollection->findOne(['mobile' => $mobile]);
+            return $this->toArray($doc);
+        } catch (Exception $e) {
+            Log::error("MongoService::findManualEntryByMobile Exception: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get all manual entries (for admin review).
+     */
+    public function getAllManualEntries(int $page = 1, int $limit = 20, bool $unverifiedOnly = false): array
+    {
+        try {
+            $db = $this->client->selectDatabase($this->database);
+            $manualCollection = $db->selectCollection('manual_entries');
+
+            $filter = [];
+            if ($unverifiedOnly) {
+                $filter['verified_by_admin'] = false;
+            }
+
+            $total = $manualCollection->countDocuments($filter);
+            $skip = ($page - 1) * $limit;
+
+            $cursor = $manualCollection->find($filter, [
+                'sort' => ['created_at' => -1],
+                'skip' => $skip,
+                'limit' => $limit,
+            ]);
+
+            $entries = [];
+            foreach ($cursor as $doc) {
+                $entry = $this->toArray($doc);
+                if ($entry) {
+                    unset($entry['pin_hash']);
+                    $entries[] = $entry;
+                }
+            }
+
+            return [
+                'entries' => $entries,
+                'total' => $total,
+                'page' => $page,
+                'limit' => $limit,
+                'pages' => (int) ceil($total / max($limit, 1)),
+            ];
+        } catch (Exception $e) {
+            Log::error("MongoService::getAllManualEntries Exception: " . $e->getMessage());
+            return ['entries' => [], 'total' => 0, 'page' => $page, 'limit' => $limit, 'pages' => 0];
+        }
+    }
+
+    /**
+     * Mark a manual entry as verified by admin.
+     */
+    public function verifyManualEntry(string $uniqueId): bool
+    {
+        try {
+            $db = $this->client->selectDatabase($this->database);
+            $manualCollection = $db->selectCollection('manual_entries');
+            $result = $manualCollection->updateOne(
+                ['unique_id' => $uniqueId],
+                ['$set' => ['verified_by_admin' => true, 'updated_at' => now()->toISOString()]]
+            );
+            return $result->getMatchedCount() > 0;
+        } catch (Exception $e) {
+            Log::error("MongoService::verifyManualEntry Exception: " . $e->getMessage());
             return false;
         }
     }

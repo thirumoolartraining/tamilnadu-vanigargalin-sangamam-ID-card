@@ -26,6 +26,9 @@ Route::prefix('vanigam')->group(function () {
     // Photo upload to Cloudinary
     Route::post('/upload-photo', [VanigamController::class, 'uploadPhoto']);
 
+    // Validate photo before PIN setup
+    Route::post('/validate-photo', [VanigamController::class, 'validatePhotoUpload']);
+
     // Generate membership card & save to MongoDB
     Route::post('/generate-card', [VanigamController::class, 'generateCard']);
 

@@ -22,7 +22,7 @@ class VanigamController extends Controller
     {
         $this->otpService = $otpService;
         $this->mongo = $mongo;
-        $this->cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+        $this->cloudinary = new \Cloudinary\Cloudinary(config('cloudinary.url'));
     }
 
     /**
@@ -274,6 +274,74 @@ class VanigamController extends Controller
     }
 
     /**
+     * POST /api/vanigam/validate-photo
+     * Validate photo before PIN setup (real-time validation)
+     */
+    public function validatePhotoUpload(Request $request)
+    {
+        try {
+            $request->validate([
+                'photo' => 'required|image|max:5120',
+                'epic_no' => 'nullable|string|max:20',
+            ]);
+
+            $photo = $request->file('photo');
+
+            // Validate file format
+            if (!in_array($photo->extension(), ['jpg', 'jpeg', 'png'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only JPG/PNG photos allowed.',
+                ], 400);
+            }
+
+            // Validate file size (max 5MB for real-time validation)
+            if ($photo->getSize() > 5 * 1024 * 1024) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Photo size must be less than 5MB.',
+                ], 400);
+            }
+
+            // Basic image validation: ensure it's a valid image file
+            $imageInfo = @getimagesize($photo->getRealPath());
+            if ($imageInfo === false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid image file. Please upload a valid photo.',
+                ], 400);
+            }
+
+            // Get image dimensions
+            $width = $imageInfo[0];
+            $height = $imageInfo[1];
+
+            // Validate image dimensions (must be at least 200x200)
+            if ($width < 200 || $height < 200) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Photo is too small. Minimum resolution: 200x200 pixels.',
+                ], 400);
+            }
+
+            // Validation passed
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo validated successfully.',
+                'width' => $width,
+                'height' => $height,
+            ]);
+
+        } catch (Exception $e) {
+            Log::error('VanigamController::validatePhotoUpload Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Photo validation failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * POST /api/vanigam/generate-card
      * Generate Vanigam membership card and store member in MongoDB
      */
@@ -292,6 +360,7 @@ class VanigamController extends Controller
                 'address' => 'nullable|string|max:300',
                 'skipped_details' => 'nullable|boolean',
                 'pin' => 'nullable|digits:4',
+                'manually_entered' => 'nullable|boolean',  // Flag for manually entered voter data
             ]);
 
             $mobile = $request->input('mobile');
@@ -353,6 +422,8 @@ class VanigamController extends Controller
                 'contact_number' => '+91 ' . $mobile,
                 'details_completed' => !$skippedDetails,
                 'referred_by' => $request->input('referrer_unique_id', ''),
+                'manually_entered' => $request->input('manually_entered', false),  // Flag for manual entries
+                'created_at' => now(),
             ];
 
             // Hash PIN if provided
@@ -364,7 +435,13 @@ class VanigamController extends Controller
             // Save to MongoDB
             $this->mongo->upsertMember($epicNo, $memberData);
 
-            Log::info("Vanigam member created: {$uniqueId} for EPIC: {$epicNo}");
+            // If manually entered, also save to the separate manual_entries collection
+            // This keeps manual entries isolated for admin review while still generating cards
+            if ($request->input('manually_entered', false)) {
+                $this->mongo->storeManualEntry($memberData);
+            }
+
+            Log::info("Vanigam member created: {$uniqueId} for EPIC: {$epicNo}" . ($request->input('manually_entered') ? ' (Manual Entry)' : ''));
 
             return response()->json([
                 'success' => true,
@@ -663,7 +740,7 @@ class VanigamController extends Controller
     {
         try {
             $key = $request->input('confirm_key');
-            if ($key !== env('MONGO_RESET_KEY', 'vanigam-reset-2026')) {
+            if ($key !== config('vanigam.reset_key')) {
                 return response()->json(['success' => false, 'message' => 'Invalid confirmation key.'], 403);
             }
 
