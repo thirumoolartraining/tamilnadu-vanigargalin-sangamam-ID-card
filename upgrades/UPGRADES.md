@@ -479,6 +479,91 @@ This document tracks all upgrades, improvements, and changes made to the Tamil N
 - **Commit Hash:** 0d93413
 - **Status:** ✅ Completed
 
+#### 11. Redis Connectivity Test in Health Check Endpoint
+- **Date:** 2026-03-21
+- **Category:** Infrastructure & Monitoring
+- **Status:** ✅ Completed
+- **Description:** Enhanced `/api/health` endpoint to actively test Redis connectivity with PING command. Provides real-time Redis availability status and error diagnostics. No exceptions thrown - always returns graceful status.
+
+**Implementation:**
+- **New Method:** `CacheService::testRedisPing()`
+  - Attempts Redis PING command
+  - Fallback: cache operation if PING unavailable
+  - Returns status array: `ok`, `unavailable`, `error`, or `skipped`
+  - Never throws exceptions (always safe)
+
+- **Updated Endpoint:** `GET /api/health`
+  - Added `CacheService` dependency injection
+  - Active Redis testing when Redis is configured
+  - Clear status reporting for debugging
+
+**Response Examples:**
+
+When Redis is OK:
+```json
+{
+  "status": "ok",
+  "redis": "ok",
+  "cache": "ok (redis)",
+  "mysql": "ok",
+  "voters_db": "ok"
+}
+```
+
+When Redis is unavailable:
+```json
+{
+  "status": "ok",
+  "redis": "unavailable",
+  "cache": "error (redis)",
+  "redis_error": "Connection refused to striking-jaybird-66451.upstash.io:6379",
+  "mysql": "ok",
+  "voters_db": "ok"
+}
+```
+
+When using file cache:
+```json
+{
+  "status": "ok",
+  "cache": "ok (file)",
+  "mysql": "ok",
+  "voters_db": "ok"
+}
+```
+
+**Key Improvements:**
+- ✅ Real-time Redis monitoring via health endpoint
+- ✅ No more "skipped" status - always tests when Redis configured
+- ✅ Explicit `redis` field for clear status indication
+- ✅ Detailed error messages for debugging connection issues
+- ✅ Added logging for health check failures
+- ✅ Graceful degradation (no exceptions thrown)
+
+**Files Modified:** 2
+  - `app/Services/CacheService.php` - Added `testRedisPing()` method (50+ lines)
+  - `app/Http/Controllers/ApiController.php` - Updated health check with active Redis testing
+
+**Use Cases:**
+- Monitor Redis uptime: `curl /api/health | jq .redis`
+- Alert on Redis failure: Check health endpoint every 5 minutes
+- Debug connection issues: `redis_error` field shows exact problem
+- Integration with monitoring tools: Prometheus, Datadog, New Relic, etc.
+
+**Monitoring Example:**
+```bash
+# Watch Redis status in real-time
+watch -n 5 'curl -s https://vanigan.digital/api/health | jq ".redis, .redis_error"'
+```
+
+**Commit Hash:** 242f31d
+- **Impact:**
+  - ✅ Better observability of Redis availability
+  - ✅ Faster detection of Redis connection issues
+  - ✅ No negative impact on non-Redis configurations
+  - ✅ Aids in debugging OTP rate limiting issues
+  - ✅ Supports automated alerting and monitoring
+
 ---
 
 ## Upgrade Template
@@ -498,9 +583,9 @@ When adding new upgrades, use this format:
 ---
 
 ## Statistics
-- **Total Upgrades Completed:** 9
+- **Total Upgrades Completed:** 10
 - **Total Upgrades Trial Tested:** 1 (API Key Middleware - 5/5 tests passed ✅)
-- **Total Files Created:** 3 (.env.example, middleware, test guide)
-- **Total Files Modified:** 5 (config, routes, .env, .env.example, routes/web.php)
+- **Total Files Created:** 4 (.env.example, middleware, cache service, test guide)
+- **Total Files Modified:** 6 (config, routes, .env, .env.example, routes/web.php, ApiController)
 - **Production Status:** ✅ READY FOR DEPLOYMENT (Trial tested & verified)
 - **Last Updated:** 2026-03-21
