@@ -35,37 +35,6 @@ Route::get('/card-view', function () {
     return view('card.view');
 })->name('card.view');
 
-// ── Test Card with Dummy Data ───────────────────────────────────────────
-Route::get('/test/card', function () {
-    $member = (object) [
-        'unique_id'      => 'VNG-A3B7C1D',
-        'epic_no'        => 'AYR1454636',
-        'name'           => 'SENTHIL KUMAR',
-        'membership'     => 'Member',
-        'assembly'       => 'Gummidipoondi',
-        'district'       => 'Tiruvallur',
-        'contact_number' => '+91 8106811285',
-        'mobile'         => '8106811285',
-        'dob'            => '15/06/1990',
-        'age'            => '35',
-        'blood_group'    => 'O+',
-        'address'        => '12, Main Road, Gummidipoondi, Tiruvallur - 601201',
-        'photo_url'      => 'https://res.cloudinary.com/dqndhcmu2/image/upload/v1773487575/vanigan/test/test_1773487573.png',
-        'qr_url'         => 'http://localhost:8000/member/verify/VNG-A3B7C1D',
-        'details_completed' => true,
-    ];
-    return view('card.vanigam', [
-        'member'       => $member,
-        'generated_at' => now()->format('d M Y, h:i A'),
-        'base_url'     => config('app.url'),
-    ]);
-});
-
-// ── Test PIN Button ────────────────────────────────────────────────────
-Route::get('/test/pin', function () {
-    return response()->file(public_path('test-pin-button.html'));
-});
-
 // ── Admin Panel ────────────────────────────────────────────────────────
 Route::get('/admin/login', [AdminPanelController::class, 'showLogin'])->name('admin.login');
 Route::post('/admin/login', [AdminPanelController::class, 'login'])->name('admin.login.submit');
