@@ -3032,6 +3032,8 @@
         // Handle PIN input states
         if (state === S.AWAIT_PIN || state === S.AWAIT_PIN_CONFIRM || state === S.AWAIT_RETURNING_PIN) {
           input.value = input.value.replace(/[^0-9]/g, '').slice(0, 4);
+          // Enable button only when exactly 4 digits are entered
+          sendBtn.disabled = input.value.length !== 4;
           return;
         }
         // EPIC validation is handled entirely by setEpicInput's oninput handler
