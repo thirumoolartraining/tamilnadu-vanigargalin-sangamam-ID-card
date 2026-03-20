@@ -295,11 +295,11 @@ class VanigamController extends Controller
                 ], 400);
             }
 
-            // Validate file size (max 5MB for real-time validation)
-            if ($photo->getSize() > 5 * 1024 * 1024) {
+            // Validate file size (max 15MB for real-time validation)
+            if ($photo->getSize() > 15 * 1024 * 1024) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Photo size must be less than 5MB.',
+                    'message' => 'Photo size must be less than 15MB.',
                 ], 400);
             }
 

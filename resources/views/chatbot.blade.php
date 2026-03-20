@@ -2942,7 +2942,7 @@
       }
 
       /* ── Photo Upload / Camera ── */
-      const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+      const MAX_PHOTO_SIZE = 15 * 1024 * 1024;
 
       window.triggerPhotoUpload = function () { if (state === S.AWAIT_PHOTO) photoInput.click(); };
       window.triggerCamera = function () { if (state === S.AWAIT_PHOTO) cameraInput.click(); };
