@@ -60,11 +60,11 @@ This document tracks all upgrades, improvements, and changes made to the Tamil N
 - ✅ Add middleware protection to `/api/vanigam/reset-members` and `/api/vanigam/upload-card-images`
 - ✅ Implement API key verification for reset-members endpoint (via X-Admin-Key header)
 - ✅ Trial tested on staging server - all tests passed
+- ✅ Remove test routes `/test/card` and `/test/pin` (no dependencies, zero references)
 
 **OPTIONAL (Can be done later):**
 - Add unique_id ownership verification for upload-card-images endpoint (1st layer is API key, 2nd layer is confirm logic)
 - Apply additional rate limiting middleware to both sensitive endpoints (optional hardening)
-- Remove `/test/pin` route (if also deemed unnecessary)
 
 **HIGH PRIORITY - From Cache Optimization:**
 - Set up monitoring/alerts for Redis connection failures
@@ -450,6 +450,35 @@ This document tracks all upgrades, improvements, and changes made to the Tamil N
 - All tests passing on trial server
 - Recommend immediate production deployment
 
+#### 10. Remove Test Routes (/test/card and /test/pin)
+- **Date:** 2026-03-21
+- **Category:** Code Quality & Development Cleanup
+- **Description:** Removed two unused test routes that were development-only and had zero dependencies. Routes provided test previews of card display and PIN button but confused production implementation.
+- **Routes Removed:**
+  - `GET /test/card` (24 lines) - Displayed test member ID card with hardcoded dummy data
+  - `GET /test/pin` (3 lines) - Attempted to serve missing file `test-pin-button.html`
+- **Analysis Before Removal:**
+  - ✅ Zero code references in entire codebase (grep search)
+  - ✅ Zero frontend links (HTML/JS/CSS search)
+  - ✅ No APIs calling these routes
+  - ✅ No route names used in other methods
+  - ✅ No tests depending on them
+  - ✅ Missing file `test-pin-button.html` confirms disuse
+- **Production Routes Unaffected:**
+  - `GET /member/card/{uniqueId}` - Production route (still available)
+  - All 9 other web routes - Unchanged
+  - All 17 API routes - Unchanged
+- **Impact:**
+  - Web routes reduced: 11 → 9 routes
+  - Reduced surface area by 2 endpoints
+  - Eliminates test/production route confusion
+  - Improves code clarity for new developers
+  - No backward compatibility issues (test-only routes)
+- **Files Modified:** 1
+  - `routes/web.php` - Removed 2 route definitions (31 lines deleted)
+- **Commit Hash:** 0d93413
+- **Status:** ✅ Completed
+
 ---
 
 ## Upgrade Template
@@ -469,9 +498,9 @@ When adding new upgrades, use this format:
 ---
 
 ## Statistics
-- **Total Upgrades Completed:** 8
+- **Total Upgrades Completed:** 9
 - **Total Upgrades Trial Tested:** 1 (API Key Middleware - 5/5 tests passed ✅)
 - **Total Files Created:** 3 (.env.example, middleware, test guide)
-- **Total Files Modified:** 4 (config, routes, .env, .env.example)
+- **Total Files Modified:** 5 (config, routes, .env, .env.example, routes/web.php)
 - **Production Status:** ✅ READY FOR DEPLOYMENT (Trial tested & verified)
 - **Last Updated:** 2026-03-21
