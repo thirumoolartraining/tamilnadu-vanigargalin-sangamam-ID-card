@@ -231,7 +231,7 @@ class VanigamController extends Controller
     {
         try {
             $request->validate([
-                'photo' => 'required|image|max:10240',
+                'photo' => 'required|image|max:15360',
                 'epic_no' => 'required|string|max:20',
             ]);
 
@@ -281,7 +281,7 @@ class VanigamController extends Controller
     {
         try {
             $request->validate([
-                'photo' => 'required|image|max:5120',
+                'photo' => 'required|image|max:15360',
                 'epic_no' => 'nullable|string|max:20',
             ]);
 
