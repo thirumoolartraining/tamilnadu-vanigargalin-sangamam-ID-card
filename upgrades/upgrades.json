@@ -1,7 +1,7 @@
 {
   "project": "Tamil Nadu Vanigargalin Sangamam",
   "upgrades_tracked_since": "2026-03-21",
-  "total_upgrades": 7,
+  "total_upgrades": 8,
   "upgrades": [
     {
       "id": 1,
@@ -343,14 +343,99 @@
       "files_modified_count": 0,
       "status": "Completed",
       "completed_date": "2026-03-21"
+    },
+    {
+      "id": 8,
+      "name": "API Key Middleware for Sensitive Endpoints",
+      "date": "2026-03-21",
+      "category": "Security",
+      "description": "Added API key middleware to protect /reset-members and /upload-card-images endpoints. Creates X-Admin-Key header validation against VANIGAM_ADMIN_API_KEY from configuration.",
+      "files_created": [
+        "app/Http/Middleware/ValidateAdminApiKey.php",
+        "upgrades/API_KEY_MIDDLEWARE_TEST_GUIDE.md"
+      ],
+      "files_modified": [
+        "config/vanigam.php",
+        "routes/api.php",
+        ".env",
+        ".env.example"
+      ],
+      "middleware_name": "validate.admin.api.key",
+      "middleware_class": "App\\Http\\Middleware\\ValidateAdminApiKey",
+      "endpoints_protected": [
+        "POST /api/vanigam/reset-members",
+        "POST /api/vanigam/upload-card-images"
+      ],
+      "endpoints_unchanged": 15,
+      "security_layers": [
+        "Layer 1: API Key Middleware (X-Admin-Key header validation)",
+        "Layer 2: Parameter Validation (confirm_key for reset-members, etc.)"
+      ],
+      "configuration": {
+        "config_key": "config('vanigam.admin_api_key')",
+        "env_variable": "VANIGAM_ADMIN_API_KEY",
+        "current_key": "b7f3c9e2a5d1f8c4e6b2a9f1d7e3c5b8a4f9d2e8b1c6f3a7e9d4c1f6b8a5e2",
+        "default_fallback": "default-admin-key-change-in-production"
+      },
+      "validation_logic": {
+        "missing_key": {
+          "response": "HTTP 401 Unauthorized",
+          "message": "Missing X-Admin-Key header."
+        },
+        "invalid_key": {
+          "response": "HTTP 401 Unauthorized",
+          "message": "Invalid X-Admin-Key."
+        },
+        "valid_key": {
+          "response": "Request proceeds to controller",
+          "message": "Passes to next middleware/controller"
+        }
+      },
+      "test_scenarios": [
+        "Missing key → HTTP 401",
+        "Invalid key → HTTP 401",
+        "Valid key + wrong confirm → HTTP 403 (controller validation)",
+        "Valid both keys → HTTP 200 (operation proceeds)",
+        "Public endpoint (no key required) → Works normally",
+        "upload-card-images without key → HTTP 401"
+      ],
+      "monitoring_points": [
+        "Watch logs for 'Missing X-Admin-Key header.'",
+        "Watch logs for 'Invalid X-Admin-Key.'",
+        "Both indicate unauthorized attempts",
+        "Can implement logging middleware for audit trail"
+      ],
+      "key_rotation": [
+        "Update VANIGAM_ADMIN_API_KEY in .env anytime",
+        "Redeploy - all previous keys become invalid",
+        "Can maintain multiple keys if code modified"
+      ],
+      "rationale": [
+        "Sensitive endpoints need protection from unauthorized access",
+        "API key enables external integrations to authenticate",
+        "Separates authorization from business logic validation",
+        "Follows REST API best practices for admin operations",
+        "Reduces surface area for brute force attacks on confirm_key"
+      ],
+      "impact": [
+        "Sensitive endpoints now protected from unauthorized access",
+        "API key-based authentication enables external integrations",
+        "Reduces surface area for brute force attacks on confirm_key",
+        "Provides audit trail via middleware (can be logged)",
+        "Scalable - can add more endpoints to same middleware"
+      ],
+      "backward_compatibility": "Full - 15 endpoints remain public",
+      "files_created_count": 2,
+      "files_modified_count": 4,
+      "status": "Completed",
+      "completed_date": "2026-03-21"
     }
-  ],
   "stats": {
     "by_category": {
       "Feature": 0,
       "Bug Fix": 0,
       "Performance": 2,
-      "Security": 0,
+      "Security": 1,
       "Refactor": 0,
       "Dependency": 0,
       "Infrastructure & Configuration": 2,
@@ -358,20 +443,20 @@
       "Code Quality & Development Cleanup": 1
     },
     "by_status": {
-      "Completed": 6,
+      "Completed": 7,
       "In Progress": 0,
       "Testing": 0,
       "Reviewed - Manual Atlas Dashboard Configuration Required": 1
     },
-    "files_created_count": 1,
-    "files_modified_count": 1
+    "files_created_count": 3,
+    "files_modified_count": 4
   },
   "statistics_summary": {
-    "total_upgrades_completed": 6,
+    "total_upgrades_completed": 7,
     "total_upgrades_reviewed": 1,
     "total_upgrades_in_progress": 0,
-    "total_files_created": 1,
-    "total_files_modified": 1
+    "total_files_created": 3,
+    "total_files_modified": 4
   },
   "last_updated": "2026-03-21T00:00:00Z"
 }

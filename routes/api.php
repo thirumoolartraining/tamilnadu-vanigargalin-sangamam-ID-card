@@ -42,10 +42,12 @@ Route::prefix('vanigam')->group(function () {
     Route::get('/qr/{uniqueId}', [VanigamController::class, 'generateQr']);
 
     // Reset MongoDB members (does NOT touch MySQL)
-    Route::post('/reset-members', [VanigamController::class, 'resetMembers']);
+    Route::post('/reset-members', [VanigamController::class, 'resetMembers'])
+        ->middleware('validate.admin.api.key');
 
     // Upload card images to Cloudinary
-    Route::post('/upload-card-images', [VanigamController::class, 'uploadCardImages']);
+    Route::post('/upload-card-images', [VanigamController::class, 'uploadCardImages'])
+        ->middleware('validate.admin.api.key');
 
     // Verify returning user PIN
     Route::post('/verify-pin', [VanigamController::class, 'verifyPin']);

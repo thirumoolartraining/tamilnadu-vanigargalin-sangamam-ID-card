@@ -303,6 +303,77 @@ This document tracks all upgrades, improvements, and changes made to the Tamil N
   - ✅ Enables environment-based security configuration
 - **Status:** ✅ Completed
 
+#### 8. API Key Middleware for Sensitive Endpoints
+- **Date:** 2026-03-21
+- **Category:** Security
+- **Description:** Added API key middleware to protect `/reset-members` and `/upload-card-images` endpoints. Creates X-Admin-Key header validation against VANIGAM_ADMIN_API_KEY from configuration.
+- **Files Created:** 2
+  - **File:** `app/Http/Middleware/ValidateAdminApiKey.php` (43 lines)
+  - **File:** `upgrades/API_KEY_MIDDLEWARE_TEST_GUIDE.md` (Comprehensive test guide)
+- **Files Modified:** 3
+  - **File:** `config/vanigam.php` - Added `admin_api_key` configuration
+  - **File:** `routes/api.php` - Added middleware to 2 routes (lines 45-46, 49-50)
+  - **File:** `.env` - Added VANIGAM_ADMIN_API_KEY variable
+  - **File:** `.env.example` - Added VANIGAM_ADMIN_API_KEY template
+- **Security Implementation:**
+  - Middleware: `ValidateAdminApiKey` class checks X-Admin-Key header
+  - Validation: String comparison against `config('vanigam.admin_api_key')`
+  - Missing key: Returns HTTP 401 with "Missing X-Admin-Key header."
+  - Invalid key: Returns HTTP 401 with "Invalid X-Admin-Key."
+  - Valid key: Request proceeds to controller for further validation
+- **Endpoints Protected:**
+  - `POST /api/vanigam/reset-members` - Now requires X-Admin-Key ✅
+  - `POST /api/vanigam/upload-card-images` - Now requires X-Admin-Key ✅
+  - All 15 other endpoints remain public (no changes)
+- **Configuration:**
+  - Middleware Name: `validate.admin.api.key`
+  - Config Key: `config('vanigam.admin_api_key')`
+  - Environment: `VANIGAM_ADMIN_API_KEY` in .env
+  - Current Key: `b7f3c9e2a5d1f8c4e6b2a9f1d7e3c5b8a4f9d2e8b1c6f3a7e9d4c1f6b8a5e2`
+  - Default Fallback: `default-admin-key-change-in-production`
+- **Rationale:**
+  - Both endpoints are sensitive (reset members, upload images)
+  - API key provides additional security layer beyond confirm_key
+  - Allows external integrations to authenticate
+  - Separates authorization from business logic validation
+  - Follows REST API best practices for admin operations
+- **Testing:**
+  - ✅ Test 1: Missing key → HTTP 401
+  - ✅ Test 2: Invalid key → HTTP 401
+  - ✅ Test 3: Valid key + wrong confirm → HTTP 403 (controller validation)
+  - ✅ Test 4: Valid both keys → HTTP 200 (operation proceeds)
+  - ✅ Test 5: Public endpoint (no key required) → Works normally
+  - ✅ Test 6: upload-card-images without key → HTTP 401
+  - See `upgrades/API_KEY_MIDDLEWARE_TEST_GUIDE.md` for curl examples
+- **Security Layers:**
+  - Layer 1: API Key Middleware (X-Admin-Key header validation)
+  - Layer 2: Parameter Validation (confirm_key for reset-members, etc.)
+  - Both layers must pass for sensitive operations to execute
+- **Impact:**
+  - ✅ Sensitive endpoints now protected from unauthorized access
+  - ✅ API key-based authentication enables external integrations
+  - ✅ Reduces surface area for brute force attacks on confirm_key
+  - ✅ Provides audit trail via middleware (can be logged)
+  - ✅ Scalable - can add more endpoints to same middleware
+- **Deployment:**
+  - Pull from GitHub (includes middleware + routes + config)
+  - Verify .env contains VANIGAM_ADMIN_API_KEY
+  - Run tests from API_KEY_MIDDLEWARE_TEST_GUIDE.md
+  - All tests must pass before production use
+- **Monitoring:**
+  - Watch Laravel logs for "Missing X-Admin-Key header." or "Invalid X-Admin-Key."
+  - Both indicate unauthorized attempts
+  - Can implement logging middleware extension for audit trail
+- **Key Rotation:**
+  - Update `VANIGAM_ADMIN_API_KEY` in `.env` anytime
+  - Redeploy and all previous keys become invalid
+  - Can maintain multiple keys if needed (requires code modification)
+- **Other Routes Status:**
+  - ✅ 15 endpoints remain completely public (unchanged)
+  - ✅ No backward compatibility issues for public endpoints
+  - ✅ Only `/reset-members` and `/upload-card-images` require key
+- **Status:** ✅ Completed & Ready for Deployment
+
 ---
 
 ## Upgrade Template
@@ -322,8 +393,8 @@ When adding new upgrades, use this format:
 ---
 
 ## Statistics
-- **Total Upgrades Completed:** 6
+- **Total Upgrades Completed:** 7
 - **Total Upgrades Reviewed:** 1
-- **Total Files Created:** 1
-- **Total Files Modified:** 1
+- **Total Files Created:** 3 (.env.example, middleware, test guide)
+- **Total Files Modified:** 4 (config, routes, .env, .env.example)
 - **Last Updated:** 2026-03-21
