@@ -1980,8 +1980,8 @@
         });
       }
 
-      function setNumeric(ph) { input.type = 'tel'; input.inputMode = 'numeric'; input.pattern = '[0-9]*'; input.placeholder = ph || ''; }
-      function setText(ph) { input.type = 'text'; input.inputMode = 'text'; input.autocapitalize = 'off'; input.removeAttribute('pattern'); input.placeholder = ph || ''; }
+      function setNumeric(ph) { input.type = 'tel'; input.inputMode = 'numeric'; input.pattern = '[0-9]*'; input.placeholder = ph || ''; input.oninput = null; input.onkeyup = null; }
+      function setText(ph) { input.type = 'text'; input.inputMode = 'text'; input.autocapitalize = 'off'; input.removeAttribute('pattern'); input.placeholder = ph || ''; input.oninput = null; input.onkeyup = null; }
 
       /* ── EPIC Format Validation (3 Alpha + 7 Numeric) ──
        * Format: Exactly 3 uppercase alphabetic characters followed by exactly 7 numeric digits
