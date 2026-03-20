@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Services\TwoFactorOtpService;
+use App\Services\CacheService;
 use App\Services\MongoService;
 use App\Helpers\VoterHelper;
 use Endroid\QrCode\QrCode;
@@ -17,11 +17,13 @@ class VanigamController extends Controller
     protected $otpService;
     protected $mongo;
     protected $cloudinary;
+    protected $cache;
 
-    public function __construct(TwoFactorOtpService $otpService, MongoService $mongo)
+    public function __construct(TwoFactorOtpService $otpService, MongoService $mongo, CacheService $cache)
     {
         $this->otpService = $otpService;
         $this->mongo = $mongo;
+        $this->cache = $cache;
         $this->cloudinary = new \Cloudinary\Cloudinary(config('cloudinary.url'));
     }
 
@@ -39,7 +41,7 @@ class VanigamController extends Controller
 
             // Rate limit: 3 OTPs per 5 minutes per IP
             $rateLimitKey = 'otp_limit:' . $request->ip();
-            $otpCount = Cache::get($rateLimitKey, 0);
+            $otpCount = $this->cache->get($rateLimitKey, 0);
             if ($otpCount >= 3) {
                 return response()->json([
                     'success' => false,
@@ -49,7 +51,7 @@ class VanigamController extends Controller
 
             // Cooldown: 60s between OTP requests for same mobile
             $cooldownKey = 'otp_cooldown:' . $mobile;
-            if (Cache::has($cooldownKey)) {
+            if ($this->cache->has($cooldownKey)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'OTP already sent. Please wait before requesting again.',
@@ -59,8 +61,8 @@ class VanigamController extends Controller
             $result = $this->otpService->sendOtp($mobile);
 
             if ($result['success']) {
-                Cache::put($rateLimitKey, $otpCount + 1, 300);
-                Cache::put($cooldownKey, true, 60);
+                $this->cache->put($rateLimitKey, $otpCount + 1, 300);
+                $this->cache->put($cooldownKey, true, 60);
 
                 return response()->json([
                     'success' => true,
