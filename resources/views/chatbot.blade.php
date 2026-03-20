@@ -2275,8 +2275,8 @@
                 saveUser({ mobile, epic, hasCard: true, memberData: res.member });
                 let h = L('mobile_verified_existing');
                 h += '<div class="member-summary"><h4>\uD83C\uDFAA ' + L('sb_vanigam_member') + '</h4>';
-                h += '<div class="row"><span class="lbl">' + L('lbl_name') + '</span><span class="val">' + (res.member.name || '') + '</span></div>';
-                h += '<div class="row"><span class="lbl">' + L('lbl_member_id') + '</span><span class="val">' + (res.member.unique_id || '') + '</span></div>';
+                h += '<div class="row"><span class="lbl">Name</span><span class="val">' + (res.member.name || '') + '</span></div>';
+                h += '<div class="row"><span class="lbl">Member ID</span><span class="val">' + (res.member.unique_id || '') + '</span></div>';
                 h += '</div>';
                 if (!res.member.details_completed) {
                   h += '<br><em style="color:#667781;">' + L('details_incomplete_hint') + '</em>';
@@ -2315,10 +2315,10 @@
               voter = res.voter;
               let h = L('voter_found') + '<div class="voter-details-card">';
               const fields = [
-                [L('lbl_name'), voter.name || ''],
-                [L('lbl_epic'), voter.epic_no || ep],
-                [L('lbl_assembly'), voter.assembly_name || ''],
-                [L('lbl_district'), voter.district || '']
+                ['Name', voter.name || ''],
+                ['EPIC No', voter.epic_no || ep],
+                ['Assembly', voter.assembly_name || ''],
+                ['District', voter.district || '']
               ];
               for (const [lbl, v] of fields) {
                 if (!v || !v.trim()) continue;
@@ -2511,8 +2511,8 @@
           // Show confirmation before proceeding
           state = S.MANUAL_CONFIRM;
           let h = '<strong>' + L('manual_confirm_title') + '</strong><div class="voter-details-card" style="margin-top:10px;">';
-          h += '<div class="detail-row"><span class="detail-label">' + L('lbl_name') + '</span><span class="detail-value">' + voter.name + '</span></div>';
-          h += '<div class="detail-row"><span class="detail-label">' + L('lbl_assembly') + '</span><span class="detail-value">' + voter.assembly_name + '</span></div>';
+          h += '<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">' + voter.name + '</span></div>';
+          h += '<div class="detail-row"><span class="detail-label">Assembly</span><span class="detail-value">' + voter.assembly_name + '</span></div>';
           h += '<div class="detail-row"><span class="detail-label" style="color:#ff9800;"><i class="bi bi-info-circle"></i></span><span class="detail-value" style="color:#ff9800;font-size:0.85rem;">' + L('manual_confirm_note') + '</span></div>';
           h += '</div>';
           h += '<div class="action-buttons" style="margin-top:12px;">';
@@ -2739,12 +2739,12 @@
           // Normal card generation mode
           let h = L('confirm_details');
           h += '<div class="member-summary"><h4>\uD83C\uDFAA ' + L('header_title') + '</h4>';
-          h += '<div class="row"><span class="lbl">' + L('lbl_name') + '</span><span class="val">' + (voter ? voter.name : '') + '</span></div>';
-          h += '<div class="row"><span class="lbl">' + L('lbl_epic') + '</span><span class="val">' + epic + '</span></div>';
-          h += '<div class="row"><span class="lbl">' + L('lbl_assembly') + '</span><span class="val">' + (voter ? (voter.assembly_name || '') : '') + '</span></div>';
-          h += '<div class="row"><span class="lbl">' + L('lbl_district') + '</span><span class="val">' + (voter ? (voter.district || '') : '') + '</span></div>';
-          h += '<div class="row"><span class="lbl">' + L('lbl_mobile') + '</span><span class="val">+91 ' + mobile + '</span></div>';
-          if (dob) h += '<div class="row"><span class="lbl">' + L('lbl_dob') + '</span><span class="val">' + dob + '</span></div>';
+          h += '<div class="row"><span class="lbl">Name</span><span class="val">' + (voter ? voter.name : '') + '</span></div>';
+          h += '<div class="row"><span class="lbl">EPIC No</span><span class="val">' + epic + '</span></div>';
+          h += '<div class="row"><span class="lbl">Assembly</span><span class="val">' + (voter ? (voter.assembly_name || '') : '') + '</span></div>';
+          h += '<div class="row"><span class="lbl">District</span><span class="val">' + (voter ? (voter.district || '') : '') + '</span></div>';
+          h += '<div class="row"><span class="lbl">Mobile</span><span class="val">+91 ' + mobile + '</span></div>';
+          if (dob) h += '<div class="row"><span class="lbl">Date of Birth</span><span class="val">' + dob + '</span></div>';
           if (bloodGroup) h += '<div class="row"><span class="lbl">' + L('lbl_blood') + '</span><span class="val">' + bloodGroup + '</span></div>';
           if (address) h += '<div class="row"><span class="lbl">' + L('lbl_address') + '</span><span class="val">' + address + '</span></div>';
           if (skippedDetails) h += '<div class="row"><span class="lbl">' + L('lbl_status') + '</span><span class="val" style="color:#ff9800;">' + L('details_pending') + '</span></div>';
