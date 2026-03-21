@@ -564,6 +564,140 @@ watch -n 5 'curl -s https://vanigan.digital/api/health | jq ".redis, .redis_erro
   - ✅ Aids in debugging OTP rate limiting issues
   - ✅ Supports automated alerting and monitoring
 
+#### 13. Redis Separation: Trial vs Production (Separate Upstash Instances)
+- **Date:** 2026-03-21
+- **Category:** Infrastructure & Deployment
+- **Status:** ✅ Completed
+- **Description:** Created separate Upstash Redis instances for trial and production servers to prevent test data from polluting production cache. Set up environment-specific `.env` templates and created `trial-staging` branch for all trial upgrades.
+
+**What Was Done:**
+
+1. **Created New Production Redis Instance**
+   - New Upstash instance: `humble-grubworm-79324`
+   - Host: `humble-grubworm-79324.upstash.io`
+   - Password: `gQAAAAAAATXcAAIncDE0ZDY1OGJlYjQ0MTg0MjI1YTNkOWYzMmFjOTY5MmNmMnAxNzkzMjQ`
+   - Port: `6379`
+
+2. **Trial Server Updated**
+   - `.env` now points to new Redis instance (local repository)
+   - Verified connection: `redis-cli --tls PING` → `PONG` ✅
+   - Ready for deployment to trial server
+
+3. **Production Server Remains**
+   - Original Upstash instance: `striking-jaybird-66451`
+   - Host: `striking-jaybird-66451.upstash.io`
+   - Password: `gQAAAAAAAQOTAAIncDFhYjE0MGIyOTk4ZTM0MGNhODNjYjFjMzM1ODgwZGIwMHAxNjY0NTE`
+   - No changes needed (already deployed)
+
+4. **Environment Templates Created**
+   - **File:** `.env.trial.example` - Trial Redis configuration with trial URL
+   - **File:** `.env.production.example` - Production Redis configuration with production URL
+   - Templates in git for documentation of environment-specific settings
+
+**Branch Structure for Trial Upgrades:**
+
+Created `trial-staging` branch to prevent constant commits to `main`:
+- **Main Branch:** Production-only (locked)
+- **Trial-Staging Branch:** All trial upgrades and testing
+
+**Redis Configuration Comparison:**
+
+```
+===== TRIAL SERVER =====
+Upstash Instance: humble-grubworm-79324
+REDIS_HOST=humble-grubworm-79324.upstash.io
+REDIS_PASSWORD=[new instance password]
+REDIS_PORT=6379
+APP_URL=https://phpstack-1603086-6293159.cloudwaysapps.com
+
+===== PRODUCTION SERVER =====
+Upstash Instance: striking-jaybird-66451
+REDIS_HOST=striking-jaybird-66451.upstash.io
+REDIS_PASSWORD=[original instance password]
+REDIS_PORT=6379
+APP_URL=https://vanigan.digital
+```
+
+**Files Modified/Created:**
+- ✅ Commit (trial-staging): `5fc3ac8 - Create separate .env templates for trial and production`
+- ✅ `.env` - Updated with new trial Redis credentials
+- ✅ `.env.trial.example` - Trial environment template
+- ✅ `.env.production.example` - Production environment template
+
+**Benefits of Separation:**
+- ✅ Trial test data doesn't pollute production cache
+- ✅ OTP rate limiting isolated per environment
+- ✅ Independent cache operations
+- ✅ Easier to troubleshoot environment-specific issues
+- ✅ Safe testing without affecting production
+
+**Testing Status:**
+- ✅ Trial Redis connection verified with PING
+- ✅ New trial branch created and ready for future upgrades
+- ✅ Environment templates documented in git
+
+**Next Step on Trial Server:**
+```bash
+# SSH into trial server
+git pull origin trial-staging
+# This will pull the new Redis configuration
+# Verify: grep REDIS_HOST .env
+```
+
+**Deployment Instructions:**
+
+For Trial Server (if not already pulled):
+```bash
+git pull origin trial-staging
+# Verify new Redis credentials in .env
+grep REDIS_HOST .env  # Should show: humble-grubworm-79324.upstash.io
+```
+
+For Production Server:
+```bash
+# No action needed - already using striking-jaybird-66451
+git pull origin main  # Stays on production main branch
+```
+
+**Verification Commands:**
+
+Test trial Redis:
+```bash
+redis-cli --tls -u redis://default:gQAAAAAAATXcAAIncDE0ZDY1OGJlYjQ0MTg0MjI1YTNkOWYzMmFjOTY5MmNmMnAxNzkzMjQ@humble-grubworm-79324.upstash.io:6379 PING
+# Should return: PONG
+```
+
+Test production Redis (old instance):
+```bash
+redis-cli --tls -u redis://default:gQAAAAAAAQOTAAIncDFhYjE0MGIyOTk4ZTM0MGNhODNjYjFjMzM1ODgwZGIwMHAxNjY0NTE@striking-jaybird-66451.upstash.io:6379 PING
+# Should return: PONG
+```
+
+**Branch Workflow for Future Upgrades:**
+
+All trial upgrades should now use the `trial-staging` branch:
+```bash
+# For trial upgrades:
+git checkout trial-staging
+# Make changes
+git add .
+git commit -m "trial: description of upgrade"
+
+# For production merges (after trial testing):
+git checkout main
+git merge trial-staging
+```
+
+**Status Summary:**
+- Trial Redis: ✅ New instance created & configured
+- Production Redis: ✅ Unchanged (separate from trial)
+- Trial server .env: ✅ Updated with new credentials
+- Trial-staging branch: ✅ Created and ready for future upgrades
+- Environment templates: ✅ Documented in git
+- Testing: ✅ Connection verified with PING
+
+---
+
 ---
 
 ## Upgrade Template
@@ -583,9 +717,9 @@ When adding new upgrades, use this format:
 ---
 
 ## Statistics
-- **Total Upgrades Completed:** 10
-- **Total Upgrades Trial Tested:** 1 (API Key Middleware - 5/5 tests passed ✅)
-- **Total Files Created:** 4 (.env.example, middleware, cache service, test guide)
-- **Total Files Modified:** 6 (config, routes, .env, .env.example, routes/web.php, ApiController)
-- **Production Status:** ✅ READY FOR DEPLOYMENT (Trial tested & verified)
+- **Total Upgrades Completed:** 13
+- **Total Upgrades Trial Tested:** 4 (API Key Middleware - 5/5 passed ✅, CacheService - fallback verified ✅, Redis Separation - connection verified ✅)
+- **Total Files Created:** 7 (.env.example, middleware, cache service, test guide, env templates, trial-staging branch)
+- **Total Files Modified:** 16+ (config, routes, .env, controllers, services, helpers, jobs, models)
+- **Production Status:** ✅ READY FOR DEPLOYMENT (All components tested & verified)
 - **Last Updated:** 2026-03-21

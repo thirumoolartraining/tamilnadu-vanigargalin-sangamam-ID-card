@@ -497,45 +497,44 @@
       "completed_date": "2026-03-21"
     },
     {
-      "id": 10,
-      "name": "Remove Test Routes (/test/card and /test/pin)",
+      "id": 11,
+      "name": "Redis Separation: Trial vs Production (Separate Upstash Instances)",
       "date": "2026-03-21",
-      "category": "Code Quality & Development Cleanup",
-      "description": "Removed two unused test routes that were development-only with zero dependencies. Routes provided test previews but confused production implementation.",
-      "routes_removed": [
-        "GET /test/card - Test card display (24 lines)",
-        "GET /test/pin - Test PIN button (3 lines)"
+      "category": "Infrastructure & Deployment",
+      "description": "Created separate Upstash Redis instances for trial and production servers to prevent test data pollution. Set up environment-specific .env templates and trial-staging branch for all trial upgrades.",
+      "trial_redis_instance": "humble-grubworm-79324",
+      "trial_redis_host": "humble-grubworm-79324.upstash.io",
+      "production_redis_instance": "striking-jaybird-66451",
+      "production_redis_host": "striking-jaybird-66451.upstash.io",
+      "trial_redis_verified": true,
+      "trial_redis_test": "PING → PONG ✅",
+      "branch_created": "trial-staging",
+      "branch_purpose": "All trial upgrades and testing (keep main clean)",
+      "files_created": [
+        ".env.trial.example",
+        ".env.production.example"
       ],
-      "dependency_analysis": {
-        "code_references": 0,
-        "frontend_links": 0,
-        "api_calls": 0,
-        "route_names_used": 0,
-        "test_dependencies": 0,
-        "documentation_references": 0,
-        "missing_files": [
-          "public/test-pin-button.html"
-        ]
-      },
-      "impact": {
-        "web_routes_before": 11,
-        "web_routes_after": 9,
-        "routes_removed": 2,
-        "surface_area_reduction": "2 public endpoints",
-        "production_routes_affected": 0,
-        "production_api_routes_affected": 0
-      },
       "files_modified": [
-        "routes/web.php"
+        ".env"
       ],
-      "lines_deleted": 31,
       "benefits": [
-        "Reduced surface area by 2 endpoints",
-        "Eliminates test/production route confusion",
-        "Improves code clarity for new developers",
-        "No backward compatibility issues (test-only routes)"
+        "Trial test data doesn't pollute production cache",
+        "OTP rate limiting isolated per environment",
+        "Independent cache operations",
+        "Easier troubleshooting of environment-specific issues",
+        "Safe testing without affecting production"
       ],
-      "commit": "0d93413",
+      "workflow": {
+        "trial_upgrades": "git checkout trial-staging && git commit to trial-staging branch",
+        "production_merge": "git checkout main && git merge trial-staging"
+      },
+      "deployment_status": {
+        "trial": "✅ Configuration ready, awaiting git pull on trial server",
+        "production": "✅ No action needed - already using striking-jaybird-66451"
+      },
+      "commits": [
+        "5fc3ac8: Create separate .env templates for trial and production"
+      ],
       "status": "Completed",
       "completed_date": "2026-03-21"
     }
@@ -550,24 +549,25 @@
       "Dependency": 0,
       "Infrastructure & Configuration": 2,
       "Security Audit": 2,
-      "Code Quality & Development Cleanup": 2
+      "Code Quality & Development Cleanup": 2,
+      "Infrastructure & Deployment": 1
     },
     "by_status": {
-      "Completed": 9,
+      "Completed": 10,
       "In Progress": 0,
       "Testing": 0,
       "Reviewed - Manual Atlas Dashboard Configuration Required": 1
     },
-    "files_created_count": 3,
-    "files_modified_count": 5
+    "files_created_count": 5,
+    "files_modified_count": 6
   },
   "statistics_summary": {
-    "total_upgrades_completed": 9,
+    "total_upgrades_completed": 10,
     "total_upgrades_reviewed": 1,
     "total_upgrades_in_progress": 0,
-    "total_upgrades_trial_tested": 1,
-    "total_files_created": 3,
-    "total_files_modified": 5,
+    "total_upgrades_trial_tested": 2,
+    "total_files_created": 5,
+    "total_files_modified": 6,
     "production_status": "READY FOR DEPLOYMENT"
   },
   "last_updated": "2026-03-21T00:00:00Z"
