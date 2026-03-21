@@ -54,26 +54,26 @@ Route::prefix('vanigam')->group(function () {
         ->middleware('throttle:200,1');
 
     // === Admin Protected Endpoints - API Key + Secondary Rate Limit ===
-    // Rate limit: 10 per 5 minutes
+    // Rate limit: 10 per 5 minutes (unique key for admin endpoints)
     Route::post('/reset-members', [VanigamController::class, 'resetMembers'])
         ->middleware([
             'validate.admin.api.key',
-            'throttle:10,5',
+            'throttle:10,5:admin_reset',
         ]);
 
     Route::post('/upload-card-images', [VanigamController::class, 'uploadCardImages'])
         ->middleware([
             'validate.admin.api.key',
-            'throttle:10,5',
+            'throttle:10,5:admin_upload',
         ]);
 
     // === PIN Verification - Brute Force Protection ===
-    // Rate limit: 10 per 5 minutes
+    // Rate limit: 10 per 5 minutes (unique key for PIN endpoints)
     Route::post('/verify-pin', [VanigamController::class, 'verifyPin'])
-        ->middleware('throttle:10,5');
+        ->middleware('throttle:10,5:pin_verify');
 
     Route::post('/verify-member-pin', [VanigamController::class, 'verifyMemberPin'])
-        ->middleware('throttle:10,5');
+        ->middleware('throttle:10,5:pin_member');
 
     // === Referral & Loan - Standard User Operations ===
     // Rate limit: 30 per 5 minutes
