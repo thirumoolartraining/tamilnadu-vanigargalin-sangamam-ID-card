@@ -221,36 +221,18 @@ class CacheService
                 ];
             }
 
-            // Attempt Redis PING via cache store
+            // Test Redis via a simple cache operation
             try {
-                $connection = Cache::store(self::REDIS_STORE)->getConnection();
-                $result = $connection->ping();
-
-                if ($result === true || $result === 'PONG') {
-                    return [
-                        'status' => 'ok',
-                        'message' => 'Redis PING successful',
-                    ];
-                }
-
+                Cache::store(self::REDIS_STORE)->get('__redis_ping_test__');
                 return [
                     'status' => 'ok',
-                    'message' => 'Redis responded: ' . (is_string($result) ? $result : 'ping'),
+                    'message' => 'Redis connection verified',
                 ];
-            } catch (Exception $pingException) {
-                // Fallback: try a simple get operation
-                try {
-                    Cache::store(self::REDIS_STORE)->get('__redis_ping_test__');
-                    return [
-                        'status' => 'ok',
-                        'message' => 'Redis connection verified via cache operation',
-                    ];
-                } catch (Exception $e) {
-                    return [
-                        'status' => 'unavailable',
-                        'message' => 'Redis connection failed: ' . $e->getMessage(),
-                    ];
-                }
+            } catch (Exception $e) {
+                return [
+                    'status' => 'unavailable',
+                    'message' => 'Redis connection failed: ' . $e->getMessage(),
+                ];
             }
         } catch (Exception $e) {
             return [
