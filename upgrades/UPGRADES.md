@@ -815,6 +815,112 @@ When deploying new features:
 - All fallbacks working correctly
 - Documentation complete and tracked
 
+#### 14. Redis TLS Scheme Configuration for Upstash
+- **Date:** 2026-03-21
+- **Category:** Infrastructure & Cache Configuration
+- **Status:** ✅ Completed & Trial Tested
+- **Description:** Fixed Predis TLS connection to Upstash Redis. Added `'scheme' => env('REDIS_SCHEME', 'tcp')` configuration to Redis connections in `config/database.php`, and configured correct Redis instance + TLS scheme on trial server.
+
+**Problem Identified:**
+- Predis was connecting with `tcp://` scheme instead of `tls://` (required by Upstash)
+- Trial server was pointing to production Redis instance instead of trial instance
+- REDIS_SCHEME environment variable was set but not passed to Predis configuration
+
+**Root Cause:**
+- Laravel's `config/database.php` Redis connections were missing the `'scheme'` key
+- Only `host`, `port`, `password` were being passed to Predis
+- Predis defaults to `tcp://` when scheme is not explicitly provided
+
+**Solution Implemented:**
+
+1. **Updated config/database.php (2 changes):**
+   - Added `'scheme' => env('REDIS_SCHEME', 'tcp'),` to `'default'` Redis connection
+   - Added `'scheme' => env('REDIS_SCHEME', 'tcp'),` to `'cache'` Redis connection
+   - Fallback to 'tcp' if REDIS_SCHEME not set in .env
+
+2. **Updated .env on trial server:**
+   - Changed REDIS_HOST: `striking-jaybird-66451.upstash.io` → `humble-grubworm-79324.upstash.io` (TRIAL instance)
+   - Changed REDIS_PASSWORD: Updated to trial instance password
+   - Added REDIS_SCHEME=tls (required for Upstash TLS)
+   - Fixed REDIS_CACHE_DB: Changed from 1 → 0 (Upstash only supports database 0)
+
+**Files Modified:**
+- `config/database.php` - Added REDIS_SCHEME to both connections (commit: 483bd4b)
+- `.env` (trial server) - Updated host, password, scheme, cache_db
+
+**Test Results (Trial Server - ALL PASSED ✅):**
+```
+✅ Test 1: Cache PUT
+   Result: Success
+   Host: humble-grubworm-79324.upstash.io
+   Scheme: tls://
+
+✅ Test 2: Cache GET
+   Result: Success (value: hello_world)
+   Verified data retrieval works
+
+✅ Test 3: Cache HAS
+   Result: Success (key exists)
+   Verified existence check works
+
+✅ Test 4: Cache FORGET
+   Result: Success (key deleted)
+   Verified deletion works
+
+🎉 REDIS TLS CONNECTION TEST PASSED
+```
+
+**Technical Details:**
+- **Predis Version:** v3.4.2 (supports TLS via scheme parameter)
+- **Connection String Before:** `tcp://humble-grubworm-79324.upstash.io:6379` ❌
+- **Connection String After:** `tls://humble-grubworm-79324.upstash.io:6379` ✅
+- **Database Support:** Upstash only supports DB 0 (not multiple databases)
+- **Config Precedence:**
+  1. REDIS_SCHEME env variable (if set)
+  2. Fallback to 'tcp' (if not set)
+
+**Deployment Steps (If Needed on Production):**
+1. Pull code: `git pull origin main` (includes config/database.php changes)
+2. Production already has correct Redis instance configured
+3. Verify .env has: `REDIS_SCHEME=tls`
+4. Clear config: `php artisan config:clear`
+5. Test connection: Access `/api/health` endpoint
+
+**Verification Checklist:**
+- ✅ Trial server Redis connecting via `tls://` scheme
+- ✅ Correct trial instance (not production)
+- ✅ Correct database (DB 0 for Upstash)
+- ✅ All cache operations working (PUT, GET, HAS, FORGET)
+- ✅ Config changes deployed to trial server
+- ✅ Config cache cleared
+- ✅ No errors in Laravel logs
+
+**Impact:**
+- ✅ Trial server now connects to correct Redis with TLS
+- ✅ Trial test data no longer affects production
+- ✅ Cache operations fully operational on trial
+- ✅ OTP rate limiting works via Redis cache
+- ✅ Production unaffected (uses separate Redis instance)
+
+**Why This Matters:**
+- Upstash requires TLS for security in transit
+- Without scheme configuration, Predis couldn't authenticate via TLS
+- Wrong database selection (DB 1) was blocked by Upstash
+- Proper configuration enables full Redis functionality for caching and rate limiting
+
+**Next Steps:**
+- Production deployment of config/database.php (if not already updated)
+- Monitor /api/health endpoint for Redis status on both servers
+- Consider setting up automated Redis health checks
+
+**GitHub Link:**
+- Commit: 483bd4b - "fix: add REDIS_SCHEME to database.php Redis connections for Upstash TLS"
+- Branch: trial-staging
+
+**Commit History:**
+- 483bd4b - fix: add REDIS_SCHEME to database.php Redis connections for Upstash TLS
+- Trial tested and verified working 2026-03-21
+
 ---
 
 ## Upgrade Template
@@ -834,10 +940,10 @@ When adding new upgrades, use this format:
 ---
 
 ## Statistics
-- **Total Upgrades Completed:** 13
-- **Total Upgrades Trial Tested:** 5 (API Key Middleware - 5/5 passed ✅, CacheService - fallback verified ✅, Redis Separation - PING verified ✅, Branch Workflow - implemented ✅)
+- **Total Upgrades Completed:** 14
+- **Total Upgrades Trial Tested:** 6 (API Key Middleware - 5/5 passed ✅, CacheService - fallback verified ✅, Redis Separation - PING verified ✅, Branch Workflow - implemented ✅, Redis TLS Scheme - 4/4 passed ✅)
 - **Total Files Created:** 9 (.env templates, middleware, cache service, test guide, trial-staging branch, redis-test.php)
-- **Total Files Modified:** 17+ (config, routes, .env, controllers, services, helpers, jobs, models, upgrade docs)
+- **Total Files Modified:** 18+ (config, routes, .env, controllers, services, helpers, jobs, models, upgrade docs)
 - **Production Status:** ✅ PRODUCTION READY (All components tested, verified & documented)
 - **Git Workflow:** ✅ Professional multi-branch strategy implemented
-- **Last Updated:** 2026-03-21 (Session: Redis Separation & Branch Strategy)
+- **Last Updated:** 2026-03-21 (Session: Redis TLS Scheme Fix & Trial Testing)
