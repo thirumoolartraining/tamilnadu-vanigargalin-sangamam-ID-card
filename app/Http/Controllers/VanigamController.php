@@ -728,10 +728,82 @@ class VanigamController extends Controller
 
     /**
      * GET /api/health
+     * Health check endpoint with Redis connectivity testing
      */
     public function health()
     {
-        return response()->json(['status' => 'ok', 'app' => 'Tamil Nadu Vanigargalin Sangamam']);
+        try {
+            $health = [
+                'status' => 'ok',
+                'app' => 'Tamil Nadu Vanigargalin Sangamam',
+                'timestamp' => now()->toIso8601String(),
+                'uptime' => floor(microtime(true)),
+            ];
+
+            // Check MySQL connections
+            try {
+                \Illuminate\Support\Facades\DB::connection('mysql')->getPdo();
+                $health['mysql'] = 'ok';
+            } catch (\Exception $e) {
+                $health['mysql'] = 'error';
+                $health['mysql_error'] = $e->getMessage();
+            }
+
+            try {
+                \Illuminate\Support\Facades\DB::connection('voters')->getPdo();
+                $health['voters_db'] = 'ok';
+            } catch (\Exception $e) {
+                $health['voters_db'] = 'error';
+                $health['voters_db_error'] = $e->getMessage();
+            }
+
+            // Check Cache (including Redis connectivity)
+            try {
+                $cacheDriver = config('cache.default');
+
+                if ($cacheDriver === 'redis') {
+                    // Test Redis PING explicitly
+                    $redisTest = $this->cache->testRedisPing();
+
+                    if ($redisTest['status'] === 'ok') {
+                        $health['redis'] = 'ok';
+                        $health['cache'] = 'ok (redis)';
+                    } elseif ($redisTest['status'] === 'unavailable') {
+                        $health['redis'] = 'unavailable';
+                        $health['cache'] = 'error (redis)';
+                        $health['redis_error'] = $redisTest['message'];
+                    } else {
+                        $health['redis'] = $redisTest['status'];
+                        $health['cache'] = $redisTest['status'] . ' (redis)';
+                        if (isset($redisTest['message'])) {
+                            $health['redis_message'] = $redisTest['message'];
+                        }
+                    }
+                } else {
+                    // File or other cache driver
+                    try {
+                        $this->cache->get('health_check_test');
+                        $health['cache'] = 'ok (' . $cacheDriver . ')';
+                    } catch (\Exception $cacheException) {
+                        $health['cache'] = 'error (' . $cacheDriver . ')';
+                        $health['cache_error'] = $cacheException->getMessage();
+                    }
+                }
+            } catch (\Exception $e) {
+                $health['cache'] = 'error';
+                $health['cache_error'] = $e->getMessage();
+                Log::warning('Health check cache test failed', ['exception' => $e->getMessage()]);
+            }
+
+            return response()->json($health);
+
+        } catch (\Exception $e) {
+            Log::error('Health check failed', ['exception' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
