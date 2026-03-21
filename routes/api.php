@@ -68,12 +68,13 @@ Route::prefix('vanigam')->group(function () {
         ]);
 
     // === PIN Verification - Brute Force Protection ===
-    // Rate limit: 10 per 5 minutes
+    // Rate limit: 10 per 5 minutes (login workflow)
     Route::post('/verify-pin', [VanigamController::class, 'verifyPin'])
-        ->middleware('throttle:pin_verify');
+        ->middleware('throttle:pin_login');
 
+    // Rate limit: 10 per 5 minutes (QR scan workflow)
     Route::post('/verify-member-pin', [VanigamController::class, 'verifyMemberPin'])
-        ->middleware('throttle:pin_verify');
+        ->middleware('throttle:pin_scan');
 
     // === Referral & Loan - Standard User Operations ===
     // Rate limit: 30 per 5 minutes

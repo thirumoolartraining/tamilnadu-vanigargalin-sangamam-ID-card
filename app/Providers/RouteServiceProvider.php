@@ -30,7 +30,11 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(200)->by($request->ip());
         });
 
-        RateLimiter::for('pin_verify', function (Request $request) {
+        RateLimiter::for('pin_login', function (Request $request) {
+            return Limit::perMinutes(5, 10)->by($request->ip());
+        });
+
+        RateLimiter::for('pin_scan', function (Request $request) {
             return Limit::perMinutes(5, 10)->by($request->ip());
         });
 
