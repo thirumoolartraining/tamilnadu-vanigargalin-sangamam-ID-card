@@ -386,8 +386,16 @@ class VanigamController extends Controller
             $address = $request->input('address', '');
             $skippedDetails = $request->input('skipped_details', false);
 
-            // Generate unique member ID
-            $uniqueId = $this->mongo->generateUniqueId();
+            // Check if mobile already exists - reuse unique_id if so, generate new if not
+            // This prevents unique_id from changing on duplicate calls
+            $existingMemberForMobile = $this->mongo->findMemberByMobile($mobile);
+            if ($existingMemberForMobile && !empty($existingMemberForMobile['unique_id'])) {
+                $uniqueId = $existingMemberForMobile['unique_id'];
+                Log::info("Reusing existing unique_id for returning mobile: {$mobile}");
+            } else {
+                $uniqueId = $this->mongo->generateUniqueId();
+                Log::info("Generated new unique_id for new mobile: {$mobile}");
+            }
 
             // Calculate age from DOB
             $age = '';
@@ -505,7 +513,13 @@ class VanigamController extends Controller
             }
 
             // Get existing member to check for old card images
+            // (Also need this to get unique_id for safe update)
             $existingMember = $this->mongo->findMemberByEpic($epicNo);
+
+            // Validate member exists before proceeding
+            if (!$existingMember || empty($existingMember['unique_id'])) {
+                return response()->json(['success' => false, 'message' => 'Member not found.'], 404);
+            }
 
             $details = [
                 'dob' => $dob,
@@ -517,33 +531,31 @@ class VanigamController extends Controller
             ];
 
             // Update QR URL from /complete/ to /verify/ since details are now filled
-            if ($existingMember && !empty($existingMember['unique_id'])) {
-                $details['qr_url'] = config('app.url') . '/member/verify/' . $existingMember['unique_id'];
-            }
+            $details['qr_url'] = config('app.url') . '/member/verify/' . $existingMember['unique_id'];
 
             // Delete old card images from Cloudinary if they exist
-            if ($existingMember && !empty($existingMember['unique_id'])) {
-                $uniqueId = $existingMember['unique_id'];
-                try {
-                    if (!empty($existingMember['card_front_url'])) {
-                        $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/front');
-                    }
-                    if (!empty($existingMember['card_back_url'])) {
-                        $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/back');
-                    }
-                    // Clear card URLs so new ones will be generated
-                    $details['card_front_url'] = '';
-                    $details['card_back_url'] = '';
-                    Log::info("Old card images removed for {$uniqueId} after details update");
-                } catch (Exception $e) {
-                    Log::warning("Could not delete old Cloudinary cards for {$uniqueId}: " . $e->getMessage());
+            $uniqueId = $existingMember['unique_id'];
+            try {
+                if (!empty($existingMember['card_front_url'])) {
+                    $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/front');
                 }
+                if (!empty($existingMember['card_back_url'])) {
+                    $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/back');
+                }
+                // Clear card URLs so new ones will be generated
+                $details['card_front_url'] = '';
+                $details['card_back_url'] = '';
+                Log::info("Old card images removed for {$uniqueId} after details update");
+            } catch (Exception $e) {
+                Log::warning("Could not delete old Cloudinary cards for {$uniqueId}: " . $e->getMessage());
             }
 
-            $updated = $this->mongo->updateMemberDetails($epicNo, $details);
+            // Update by unique_id instead of epic_no to prevent wrong member update
+            // when duplicate EPICs exist across different mobiles
+            $updated = $this->mongo->updateMemberDetailsByUniqueId($existingMember['unique_id'], $details);
 
             if ($updated) {
-                $member = $this->mongo->findMemberByEpic($epicNo);
+                $member = $this->mongo->findMemberByUniqueId($existingMember['unique_id']);
                 return response()->json([
                     'success' => true,
                     'message' => 'Details updated successfully.',

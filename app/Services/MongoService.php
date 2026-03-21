@@ -158,6 +158,32 @@ class MongoService
     }
 
     /**
+     * Update additional details for a member by unique_id (not epic_no).
+     * Prevents wrong member from being updated when duplicate EPICs exist.
+     *
+     * @param string $uniqueId The member's unique_id (TNVS-XXXXXX)
+     * @param array $details The details to update (dob, age, blood_group, address, etc.)
+     * @return bool True if update successful, false otherwise
+     */
+    public function updateMemberDetailsByUniqueId(string $uniqueId, array $details): bool
+    {
+        try {
+            $details['updated_at']        = now()->toISOString();
+            $details['details_completed'] = true;
+
+            $result = $this->collection->updateOne(
+                ['unique_id' => $uniqueId],
+                ['$set' => $details]
+            );
+
+            return $result->getMatchedCount() > 0;
+        } catch (Exception $e) {
+            Log::error("MongoService::updateMemberDetailsByUniqueId Exception: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Generate unique member ID: TNVS-XXXXXX
      */
     public function generateUniqueId(): string
