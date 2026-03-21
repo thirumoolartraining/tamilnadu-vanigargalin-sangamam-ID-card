@@ -762,22 +762,32 @@ class VanigamController extends Controller
                 $cacheDriver = config('cache.default');
 
                 if ($cacheDriver === 'redis') {
-                    // Test Redis PING explicitly
-                    $redisTest = $this->cache->testRedisPing();
+                    // Test Redis PING explicitly - wrap in try-catch for extra safety
+                    try {
+                        $redisTest = $this->cache->testRedisPing();
 
-                    if ($redisTest['status'] === 'ok') {
-                        $health['redis'] = 'ok';
-                        $health['cache'] = 'ok (redis)';
-                    } elseif ($redisTest['status'] === 'unavailable') {
-                        $health['redis'] = 'unavailable';
-                        $health['cache'] = 'error (redis)';
-                        $health['redis_error'] = $redisTest['message'];
-                    } else {
-                        $health['redis'] = $redisTest['status'];
-                        $health['cache'] = $redisTest['status'] . ' (redis)';
-                        if (isset($redisTest['message'])) {
-                            $health['redis_message'] = $redisTest['message'];
+                        if ($redisTest['status'] === 'ok') {
+                            $health['redis'] = 'ok';
+                            $health['cache'] = 'ok (redis)';
+                        } elseif ($redisTest['status'] === 'unavailable') {
+                            $health['redis'] = 'unavailable';
+                            $health['cache'] = 'unavailable (redis fallback to file)';
+                            $health['redis_error'] = $redisTest['message'];
+                        } else {
+                            $health['redis'] = $redisTest['status'];
+                            $health['cache'] = $redisTest['status'] . ' (redis)';
+                            if (isset($redisTest['message'])) {
+                                $health['redis_message'] = $redisTest['message'];
+                            }
                         }
+                    } catch (\Exception $redisException) {
+                        // Redis test threw exception - report as unavailable but app is still ok
+                        $health['redis'] = 'unavailable';
+                        $health['cache'] = 'ok (file fallback)';
+                        $health['redis_error'] = $redisException->getMessage();
+                        Log::warning('Redis health check error (fallback active)', [
+                            'exception' => $redisException->getMessage(),
+                        ]);
                     }
                 } else {
                     // File or other cache driver
