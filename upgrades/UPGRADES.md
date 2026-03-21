@@ -692,9 +692,20 @@ git merge trial-staging
 - Trial Redis: ✅ New instance created & configured
 - Production Redis: ✅ Unchanged (separate from trial)
 - Trial server .env: ✅ Updated with new credentials
-- Trial-staging branch: ✅ Created and ready for future upgrades
+- Trial-staging branch: ✅ Created and pushed to GitHub
 - Environment templates: ✅ Documented in git
 - Testing: ✅ Connection verified with PING
+
+**GitHub Links:**
+- **Trial-Staging Branch:** https://github.com/thirumoolartraining/tamilnadu-vanigargalin-sangamam-ID-card/tree/trial-staging
+- **Main Branch (Production):** https://github.com/thirumoolartraining/tamilnadu-vanigargalin-sangamam-ID-card/tree/main
+- **Repository:** https://github.com/thirumoolartraining/tamilnadu-vanigargalin-sangamam-ID-card
+
+**Repository Branches:**
+```
+main (production - LOCKED)
+  └─ trial-staging (trial testing & upgrades - ACTIVE)
+```
 
 ---
 

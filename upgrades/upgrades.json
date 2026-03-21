@@ -510,6 +510,8 @@
       "trial_redis_test": "PING → PONG ✅",
       "branch_created": "trial-staging",
       "branch_purpose": "All trial upgrades and testing (keep main clean)",
+      "github_branch_url": "https://github.com/thirumoolartraining/tamilnadu-vanigargalin-sangamam-ID-card/tree/trial-staging",
+      "github_repository": "https://github.com/thirumoolartraining/tamilnadu-vanigargalin-sangamam-ID-card",
       "files_created": [
         ".env.trial.example",
         ".env.production.example"
