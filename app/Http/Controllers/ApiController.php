@@ -23,7 +23,7 @@ class ApiController extends Controller
     {
         try {
             $health = [
-                'status' => 'ok',
+                'success' => true,
                 'timestamp' => now()->toIso8601String(),
                 'uptime' => floor(microtime(true)),
             ];
@@ -88,8 +88,9 @@ class ApiController extends Controller
         } catch (\Exception $e) {
             Log::error('Health check failed', ['exception' => $e->getMessage()]);
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => $e->getMessage(),
+                'error_code' => 'HEALTH_CHECK_FAILED',
             ], 500);
         }
     }

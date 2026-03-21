@@ -46,6 +46,7 @@ class VanigamController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Too many OTP requests. Please try after 5 minutes.',
+                    'error_code' => 'OTP_RATE_LIMIT',
                 ], 429);
             }
 
@@ -55,6 +56,7 @@ class VanigamController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'OTP already sent. Please wait before requesting again.',
+                    'error_code' => 'OTP_COOLDOWN',
                 ], 429);
             }
 
@@ -74,11 +76,12 @@ class VanigamController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $result['error'] ?? 'Could not send OTP.',
+                'error_code' => 'OTP_SEND_FAILED',
             ], 500);
 
         } catch (Exception $e) {
             Log::error('VanigamController::sendOtp Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -125,7 +128,7 @@ class VanigamController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error('VanigamController::checkMember Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -180,11 +183,12 @@ class VanigamController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $result['error'] ?? 'Invalid OTP.',
+                'error_code' => 'INVALID_OTP',
             ], 400);
 
         } catch (Exception $e) {
             Log::error('VanigamController::verifyOtp Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -207,6 +211,7 @@ class VanigamController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'EPIC Number not found. Please check and try again.',
+                    'error_code' => 'EPIC_NOT_FOUND',
                 ], 404);
             }
 
@@ -222,7 +227,7 @@ class VanigamController extends Controller
 
         } catch (Exception $e) {
             Log::error('VanigamController::validateEpic Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -258,7 +263,7 @@ class VanigamController extends Controller
             $photoUrl = $result['secure_url'] ?? '';
 
             if (!$photoUrl) {
-                return response()->json(['success' => false, 'message' => 'Photo upload failed.'], 500);
+                return response()->json(['success' => false, 'message' => 'Photo upload failed.', 'error_code' => 'PHOTO_UPLOAD_FAILED'], 500);
             }
 
             Log::info("Photo uploaded for {$epicNo}: {$photoUrl}");
@@ -271,7 +276,7 @@ class VanigamController extends Controller
 
         } catch (Exception $e) {
             Log::error('VanigamController::uploadPhoto Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Photo upload failed: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Photo upload failed: ' . $e->getMessage(), 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -294,6 +299,7 @@ class VanigamController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Only JPG/PNG photos allowed.',
+                    'error_code' => 'INVALID_PHOTO_FORMAT',
                 ], 400);
             }
 
@@ -302,6 +308,7 @@ class VanigamController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Photo size must be less than 15MB.',
+                    'error_code' => 'PHOTO_TOO_LARGE',
                 ], 400);
             }
 
@@ -311,6 +318,7 @@ class VanigamController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid image file. Please upload a valid photo.',
+                    'error_code' => 'INVALID_IMAGE_FILE',
                 ], 400);
             }
 
@@ -323,6 +331,7 @@ class VanigamController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Photo is too small. Minimum resolution: 200x200 pixels.',
+                    'error_code' => 'PHOTO_TOO_SMALL',
                 ], 400);
             }
 
@@ -338,7 +347,8 @@ class VanigamController extends Controller
             Log::error('VanigamController::validatePhotoUpload Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Photo validation failed: ' . $e->getMessage()
+                'message' => 'Photo validation failed: ' . $e->getMessage(),
+                'error_code' => 'INTERNAL_ERROR'
             ], 500);
         }
     }
@@ -696,10 +706,10 @@ class VanigamController extends Controller
                 return response()->json(['success' => true]);
             }
 
-            return response()->json(['success' => false, 'message' => 'Invalid PIN. Please try again.'], 400);
+            return response()->json(['success' => false, 'message' => 'Invalid PIN. Please try again.', 'error_code' => 'INVALID_PIN'], 400);
         } catch (Exception $e) {
             Log::error('VanigamController::verifyMemberPin Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -825,7 +835,7 @@ class VanigamController extends Controller
         try {
             $key = $request->input('confirm_key');
             if ($key !== config('vanigam.reset_key')) {
-                return response()->json(['success' => false, 'message' => 'Invalid confirmation key.'], 403);
+                return response()->json(['success' => false, 'message' => 'Invalid confirmation key.', 'error_code' => 'INVALID_RESET_KEY'], 403);
             }
 
             $result = $this->mongo->deleteAllMembers();
@@ -837,10 +847,10 @@ class VanigamController extends Controller
                     'deleted_count' => $deletedCount,
                 ]);
             }
-            return response()->json(['success' => false, 'message' => 'Failed to reset MongoDB.'], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to reset MongoDB.', 'error_code' => 'RESET_FAILED'], 500);
         } catch (Exception $e) {
             Log::error('VanigamController::resetMembers Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -889,7 +899,7 @@ class VanigamController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error('VanigamController::uploadCardImages Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Card image upload failed.'], 500);
+            return response()->json(['success' => false, 'message' => 'Card image upload failed.', 'error_code' => 'CARD_UPLOAD_FAILED'], 500);
         }
     }
 
@@ -907,7 +917,7 @@ class VanigamController extends Controller
 
             $member = $this->mongo->findMemberByMobile($request->input('mobile'));
             if (!$member || empty($member['pin_hash'])) {
-                return response()->json(['success' => false, 'message' => 'Member not found or PIN not set.'], 404);
+                return response()->json(['success' => false, 'message' => 'Member not found or PIN not set.', 'error_code' => 'MEMBER_OR_PIN_NOT_FOUND'], 404);
             }
 
             if (password_verify($request->input('pin'), $member['pin_hash'])) {
@@ -919,10 +929,10 @@ class VanigamController extends Controller
                 ]);
             }
 
-            return response()->json(['success' => false, 'message' => 'Invalid PIN. Please try again.'], 400);
+            return response()->json(['success' => false, 'message' => 'Invalid PIN. Please try again.', 'error_code' => 'INVALID_PIN'], 400);
         } catch (Exception $e) {
             Log::error('VanigamController::verifyPin Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -936,12 +946,12 @@ class VanigamController extends Controller
             $uniqueId = $request->input('unique_id');
             Log::info("getReferral called with unique_id: " . ($uniqueId ?? 'null'));
             if (!$uniqueId) {
-                return response()->json(['success' => false, 'message' => 'Missing unique_id.'], 400);
+                return response()->json(['success' => false, 'message' => 'Missing unique_id.', 'error_code' => 'MISSING_UNIQUE_ID'], 400);
             }
 
             $referralId = $this->mongo->getOrCreateReferralId($uniqueId);
             if (!$referralId) {
-                return response()->json(['success' => false, 'message' => 'Member not found.'], 404);
+                return response()->json(['success' => false, 'message' => 'Member not found.', 'error_code' => 'MEMBER_NOT_FOUND'], 404);
             }
 
             $member = $this->mongo->findMemberByUniqueId($uniqueId);
@@ -956,7 +966,7 @@ class VanigamController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error('VanigamController::getReferral Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -983,7 +993,7 @@ class VanigamController extends Controller
         try {
             $referrerUniqueId = $request->input('referrer_unique_id');
             if (!$referrerUniqueId) {
-                return response()->json(['success' => false, 'message' => 'Missing referrer ID.'], 400);
+                return response()->json(['success' => false, 'message' => 'Missing referrer ID.', 'error_code' => 'MISSING_REFERRER_ID'], 400);
             }
 
             $this->mongo->incrementReferralCount($referrerUniqueId);
@@ -991,7 +1001,7 @@ class VanigamController extends Controller
             return response()->json(['success' => true]);
         } catch (Exception $e) {
             Log::error('VanigamController::incrementReferral Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -1007,12 +1017,12 @@ class VanigamController extends Controller
             $businessName = $request->input('business_name');
 
             if (!$uniqueId || !$businessType || !$businessName) {
-                return response()->json(['success' => false, 'message' => 'Missing required fields.'], 400);
+                return response()->json(['success' => false, 'message' => 'Missing required fields.', 'error_code' => 'MISSING_REQUIRED_FIELDS'], 400);
             }
 
             $member = $this->mongo->findMemberByUniqueId($uniqueId);
             if (!$member) {
-                return response()->json(['success' => false, 'message' => 'Member not found.'], 404);
+                return response()->json(['success' => false, 'message' => 'Member not found.', 'error_code' => 'MEMBER_NOT_FOUND'], 404);
             }
 
             // Store loan request
@@ -1033,7 +1043,7 @@ class VanigamController extends Controller
             return response()->json(['success' => true, 'message' => 'Loan request submitted successfully.']);
         } catch (Exception $e) {
             Log::error('VanigamController::loanRequest Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -1048,7 +1058,7 @@ class VanigamController extends Controller
             $mobile = $request->input('mobile');
 
             if (!$uniqueId && !$mobile) {
-                return response()->json(['success' => false, 'message' => 'Missing unique_id or mobile.'], 400);
+                return response()->json(['success' => false, 'message' => 'Missing unique_id or mobile.', 'error_code' => 'MISSING_PARAMETERS'], 400);
             }
 
             $loanRequest = null;
@@ -1087,7 +1097,7 @@ class VanigamController extends Controller
             return response()->json(['success' => true, 'has_applied' => false]);
         } catch (Exception $e) {
             Log::error('VanigamController::checkLoanStatus Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 }
