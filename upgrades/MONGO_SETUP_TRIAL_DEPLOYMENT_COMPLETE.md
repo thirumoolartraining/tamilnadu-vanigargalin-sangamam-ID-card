@@ -38,7 +38,7 @@ The MongoDB trial setup is **COMPLETE and VERIFIED**:
 **File:** `.env` (TRIAL ONLY)
 
 ```
-MONGO_URL=mongodb+srv://thirumoolartraining_db_user:dJIyPnRpz2minDTX@cluster0.dk4aq5h.mongodb.net/?appName=Cluster0
+MONGO_URL=mongodb+srv://[username]:[password]@cluster0.dk4aq5h.mongodb.net/?appName=Cluster0
 MONGO_DB_NAME=vanigan_trial
 ```
 

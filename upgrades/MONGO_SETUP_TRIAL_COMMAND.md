@@ -33,7 +33,7 @@ Currently, both trial and production use the same MongoDB database (`vanigan`). 
 # File: .env (TRIAL ONLY - NOT production)
 
 # NEW MongoDB Trial Instance
-MONGO_URL=mongodb+srv://thirumoolartraining_db_user:dJIyPnRpz2minDTX@cluster0.dk4aq5h.mongodb.net/?appName=Cluster0
+MONGO_URL=mongodb+srv://[username]:[password]@cluster0.dk4aq5h.mongodb.net/?appName=Cluster0
 MONGO_DB_NAME=vanigan_trial
 ```
 
@@ -368,7 +368,7 @@ cd /home/1603086.cloudwaysapps.com/dcjsrvggcr/public_html
 nano .env
 
 # Update these lines (same variables the app reads):
-MONGO_URL=mongodb+srv://thirumoolartraining_db_user:dJIyPnRpz2minDTX@cluster0.dk4aq5h.mongodb.net/?appName=Cluster0
+MONGO_URL=mongodb+srv://[username]:[password]@cluster0.dk4aq5h.mongodb.net/?appName=Cluster0
 MONGO_DB_NAME=vanigan_trial
 
 # Save (Ctrl+X, Y, Enter)
