@@ -68,8 +68,8 @@ class MongoSetupTrial extends Command
 
             foreach ($collections as $collectionName) {
                 try {
-                    // Check if collection exists
-                    $existingCollections = $db->listCollectionNames();
+                    // Check if collection exists (convert iterator to array)
+                    $existingCollections = iterator_to_array($db->listCollectionNames());
 
                     if (in_array($collectionName, $existingCollections)) {
                         $this->line("   ⚠️  Collection '{$collectionName}' already exists (skipping creation)");
@@ -134,7 +134,7 @@ class MongoSetupTrial extends Command
             $this->info('✔️  STEP 5: Verifying Setup...');
 
             // List all collections
-            $allCollections = $db->listCollectionNames();
+            $allCollections = iterator_to_array($db->listCollectionNames());
             $this->line('   Collections:');
             foreach ($allCollections as $col) {
                 $count = $db->selectCollection($col)->countDocuments();
