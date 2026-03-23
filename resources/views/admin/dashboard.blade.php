@@ -199,7 +199,7 @@
         <div class="section-header"><h3><i class="bi bi-bar-chart-fill" style="color:#2e7d32;"></i> Members by Assembly</h3></div>
         <div class="section-body">
           @if(count($stats['assemblyStats']) > 0)
-            @php $maxAssembly = max(array_column($stats['assemblyStats'], 'count')); @endphp
+            @php $maxAssembly = !empty(array_column($stats['assemblyStats'], 'count')) ? max(array_column($stats['assemblyStats'], 'count')) : 1; @endphp
             @foreach($stats['assemblyStats'] as $a)
             <div class="chart-bar-wrap">
               <div class="chart-bar-label"><span>{{ $a['assembly'] ?? 'Unknown' }}</span><span>{{ $a['count'] }}</span></div>
@@ -217,7 +217,7 @@
         <div class="section-header"><h3><i class="bi bi-geo-alt-fill" style="color:#ef6c00;"></i> Members by District</h3></div>
         <div class="section-body">
           @if(count($stats['districtStats']) > 0)
-            @php $maxDistrict = max(array_column($stats['districtStats'], 'count')); @endphp
+            @php $maxDistrict = !empty(array_column($stats['districtStats'], 'count')) ? max(array_column($stats['districtStats'], 'count')) : 1; @endphp
             @foreach($stats['districtStats'] as $d)
             <div class="chart-bar-wrap">
               <div class="chart-bar-label"><span>{{ $d['district'] ?? 'Unknown' }}</span><span>{{ $d['count'] }}</span></div>
