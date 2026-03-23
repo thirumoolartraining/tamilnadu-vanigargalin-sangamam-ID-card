@@ -18,7 +18,7 @@ class MongoSetupTrial extends Command
 
         try {
             // Get MongoDB credentials from .env
-            $mongoUrl = config('services.mongodb.url') ?: env('MONGO_URL');
+            $mongoUrl = config('mongodb.url') ?: env('MONGO_URL');
             $dbName = env('MONGO_DB_NAME', 'vanigan');  // ← Same variable the app uses
 
             if (!$mongoUrl) {
